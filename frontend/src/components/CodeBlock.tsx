@@ -8,6 +8,7 @@ import {
 interface CodeBlockProps {
   code: string;
   label: string;
+  language?: string; // Dynamic language support
   variant?: "success" | "danger";
   isDark: boolean;
 }
@@ -15,6 +16,7 @@ interface CodeBlockProps {
 export const CodeBlock: React.FC<CodeBlockProps> = ({
   code,
   label,
+  language = "typescript", // Default to typescript for backward compatibility
   variant = "success",
   isDark,
 }) => {
@@ -67,7 +69,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
       <div className="overflow-x-auto max-w-full">
         <div className="text-xs sm:text-sm">
           <SyntaxHighlighter
-            language="typescript"
+            language={language}
             style={isDark ? vscDarkPlus : vs}
             customStyle={{
               margin: 0,

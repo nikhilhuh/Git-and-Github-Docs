@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { productionContent } from "../data/docsContent";
+import { gitContent } from "../data/docsContent";
 
 interface PrevNextNavProps {
   currentId: string;
@@ -11,9 +11,9 @@ export const PrevNextNav: React.FC<PrevNextNavProps> = ({
   currentId,
   isDark,
 }) => {
-  const currentIndex = productionContent.findIndex((i) => i.id === currentId);
-  const prev = productionContent[currentIndex - 1];
-  const next = productionContent[currentIndex + 1];
+  const currentIndex = gitContent.findIndex((i) => i.id === currentId);
+  const prev = gitContent[currentIndex - 1];
+  const next = gitContent[currentIndex + 1];
 
   return (
     <div

@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { productionContent } from "../data/docsContent";
+import { gitContent } from "../data/docsContent";
 import { Section } from "../components/Section";
 import { PrevNextNav } from "../components/PrevNextNav";
 import { formatDate } from "../utils/formatDate";
@@ -12,7 +12,7 @@ interface FeaturePageProps {
 
 export const FeaturePage: React.FC<FeaturePageProps> = ({ isDark }) => {
   const { id } = useParams<{ id: string }>();
-  const content = productionContent.find((item) => item.id === id);
+  const content = gitContent.find((item) => item.id === id);
 
   if (!content) {
     return <Navigate to="/" replace />;
@@ -26,64 +26,64 @@ export const FeaturePage: React.FC<FeaturePageProps> = ({ isDark }) => {
     description: content.description,
     author: {
       "@type": "Organization",
-      name: "Production Code",
+      name: "Git & Github Master Guide",
     },
     datePublished: content.lastUpdated || "2026-02-01",
     dateModified: content.lastUpdated || "2026-02-01",
     publisher: {
       "@type": "Organization",
-      name: "Production Code",
+      name: "Git & Github Master Guide",
       logo: {
         "@type": "ImageObject",
-        url: "https://production-code.com/logo.png",
+        url: "https://git-and-github-docs.vercel.app/logo.png",
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://production-code.com/docs/${content.id}`,
+      "@id": `https://git-and-github-docs.vercel.app/docs/${content.id}`,
     },
   };
 
   return (
     <>
       <Helmet>
-        <title>{`${content.title} | Production Code Guide`}</title>
+        <title>{`${content.title} | Git & Github Master Guide`}</title>
         <meta name="description" content={content.description} />
         <link
           rel="canonical"
-          href={`https://production-code.com/docs/${content.id}`}
+          href={`https://git-and-github-docs.vercel.app/docs/${content.id}`}
         />
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="article" />
         <meta
           property="og:url"
-          content={`https://production-code.com/docs/${content.id}`}
+          content={`https://git-and-github-docs.vercel.app/docs/${content.id}`}
         />
         <meta
           property="og:title"
-          content={`${content.title} | Production Code Guide`}
+          content={`${content.title} | Git & Github Master Guide`}
         />
         <meta property="og:description" content={content.description} />
         <meta
           property="og:image"
-          content="https://production-code.com/og-image.png"
+          content="https://git-and-github-docs.vercel.app/images/og-image.png"
         />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:url"
-          content={`https://production-code.com/docs/${content.id}`}
+          content={`https://git-and-github-docs.vercel.app/docs/${content.id}`}
         />
         <meta
           name="twitter:title"
-          content={`${content.title} | Production Code Guide`}
+          content={`${content.title} | Git & Github Master Guide`}
         />
         <meta name="twitter:description" content={content.description} />
         <meta
           name="twitter:image"
-          content="https://production-code.com/og-image.png"
+          content="https://git-and-github-docs.vercel.app/images/og-image.png"
         />
 
         {/* Structured Data */}

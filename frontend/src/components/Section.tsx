@@ -12,185 +12,258 @@ export const Section: React.FC<SectionProps> = ({ data, isDark }) => {
   return (
     <article className="space-y-16">
       {/* Overview Section */}
-      <section>
-        <h2
-          id="overview"
-          className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
-            isDark ? "text-neutral-100" : "text-gray-900"
-          }`}
-        >
-          Overview
-        </h2>
-        <p
-          className={`text-base sm:text-lg leading-relaxed break-words ${
-            isDark ? "text-neutral-300" : "text-gray-700"
-          }`}
-        >
-          {data.overview}
-        </p>
-      </section>
+      {data.overview && (
+        <section>
+          <h2
+            id="overview"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Overview
+          </h2>
+          <p
+            className={`text-base sm:text-lg leading-relaxed break-words ${
+              isDark ? "text-neutral-300" : "text-gray-700"
+            }`}
+          >
+            {data.overview}
+          </p>
+        </section>
+      )}
 
       {/* Detailed Explanation */}
-      <section>
-        <h2
-          id={slugify(`Understanding ${data.title}`)}
-          className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
-            isDark ? "text-neutral-100" : "text-gray-900"
-          }`}
-        >
-          Understanding {data.title}
-        </h2>
-        <div className="space-y-6">
-          {data.detailedExplanation.map((paragraph, idx) => (
-            <p
-              key={idx}
-              className={`text-base sm:text-lg leading-relaxed break-words ${
-                isDark ? "text-neutral-300" : "text-gray-700"
-              }`}
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
-      </section>
-
-      {/* Code Examples */}
-      <section>
-        <h2
-          id="code-examples"
-          className={`text-2xl sm:text-3xl font-bold mb-8 break-words ${
-            isDark ? "text-neutral-100" : "text-gray-900"
-          }`}
-        >
-          Code Examples
-        </h2>
-        <div className="space-y-12">
-          {data.codeExamples.map((example, idx) => (
-            <div key={idx} className="space-y-6">
-              <h3
-                id={slugify(example.label)}
-                className={`text-lg sm:text-xl font-semibold break-words ${
-                  isDark ? "text-neutral-200" : "text-gray-800"
+      {data.detailedExplanation && data.detailedExplanation.length > 0 && (
+        <section>
+          <h2
+            id={slugify(`Understanding ${data.title}`)}
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Understanding {data.title}
+          </h2>
+          <div className="space-y-6">
+            {data.detailedExplanation.map((paragraph, idx) => (
+              <p
+                key={idx}
+                className={`text-base sm:text-lg leading-relaxed break-words ${
+                  isDark ? "text-neutral-300" : "text-gray-700"
                 }`}
               >
-                {example.label}
-              </h3>
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
 
-              {/* Wrong Example */}
-              <div className="space-y-3">
-                <h4
-                  className={`text-base sm:text-lg font-semibold break-words ${
+      {/* Code Blocks */}
+      {data.codeBlocks && data.codeBlocks.length > 0 && (
+        <section>
+          <h2
+            id="code-examples"
+            className={`text-2xl sm:text-3xl font-bold mb-8 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Code Examples
+          </h2>
+          <div className="space-y-12">
+            {data.codeBlocks.map((block, idx) => (
+              <div key={idx} className="space-y-4">
+                <h3
+                  id={slugify(block.label)}
+                  className={`text-lg sm:text-xl font-semibold break-words ${
+                    isDark ? "text-neutral-200" : "text-gray-800"
+                  }`}
+                >
+                  {block.label}
+                </h3>
+
+                <CodeBlock
+                  code={block.code}
+                  label={block.language}
+                  language={block.language}
+                  isDark={isDark}
+                />
+
+                {block.explanation && (
+                  <p
+                    className={`text-sm sm:text-base leading-relaxed italic break-words ${
+                      isDark ? "text-neutral-400" : "text-gray-600"
+                    }`}
+                  >
+                    <strong
+                      className={isDark ? "text-neutral-300" : "text-gray-700"}
+                    >
+                      📝 Note:
+                    </strong>{" "}
+                    {block.explanation}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Workflow Steps */}
+      {data.workflowSteps && data.workflowSteps.length > 0 && (
+        <section>
+          <h2
+            id="workflow-steps"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Workflow Steps
+          </h2>
+          <ol className="space-y-3 list-decimal list-inside">
+            {data.workflowSteps.map((step, idx) => (
+              <li
+                key={idx}
+                className={`text-base sm:text-lg leading-relaxed break-words ${
+                  isDark ? "text-neutral-300" : "text-gray-700"
+                }`}
+              >
+                {step}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* GitHub Desktop Steps */}
+      {data.desktopSteps && data.desktopSteps.length > 0 && (
+        <section>
+          <h2
+            id="desktop-steps"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            GitHub Desktop Steps
+          </h2>
+          <ol className="space-y-3 list-decimal list-inside">
+            {data.desktopSteps.map((step, idx) => (
+              <li
+                key={idx}
+                className={`text-base sm:text-lg leading-relaxed break-words ${
+                  isDark ? "text-neutral-300" : "text-gray-700"
+                }`}
+              >
+                {step}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* Key Takeaways */}
+      {data.keyTakeaways && data.keyTakeaways.length > 0 && (
+        <section>
+          <h2
+            id="key-takeaways"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Key Takeaways
+          </h2>
+          <ul className="space-y-3">
+            {data.keyTakeaways.map((takeaway, idx) => (
+              <li
+                key={idx}
+                className={`flex items-start text-base sm:text-lg leading-relaxed break-words ${
+                  isDark ? "text-neutral-300" : "text-gray-700"
+                }`}
+              >
+                <span
+                  className={`mr-3 mt-1 flex-shrink-0 ${
+                    isDark ? "text-blue-400" : "text-blue-600"
+                  }`}
+                >
+                  ✓
+                </span>
+                <span>{takeaway}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Common Mistakes */}
+      {data.commonMistakes && data.commonMistakes.length > 0 && (
+        <section>
+          <h2
+            id="common-mistakes"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Common Mistakes to Avoid
+          </h2>
+          <ul className="space-y-3">
+            {data.commonMistakes.map((mistake, idx) => (
+              <li
+                key={idx}
+                className={`flex items-start text-base sm:text-lg leading-relaxed break-words ${
+                  isDark ? "text-neutral-300" : "text-gray-700"
+                }`}
+              >
+                <span
+                  className={`mr-3 mt-1 flex-shrink-0 ${
                     isDark ? "text-red-400" : "text-red-600"
                   }`}
                 >
-                  ❌ Wrong
-                </h4>
-                <CodeBlock
-                  code={example.nonProductionCode}
-                  label="Non-Production"
-                  variant="danger"
-                  isDark={isDark}
-                />
-              </div>
+                  ✗
+                </span>
+                <span>{mistake}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-              {/* Right Example */}
-              <div className="space-y-3">
-                <h4
-                  className={`text-base sm:text-lg font-semibold break-words ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                >
-                  ✅ Right
-                </h4>
-                <CodeBlock
-                  code={example.productionCode}
-                  label="Production"
-                  variant="success"
-                  isDark={isDark}
-                />
-              </div>
-
-              {/* Explanation */}
+      {/* Warnings */}
+      {data.warnings && data.warnings.length > 0 && (
+        <section>
+          <h2
+            id="warnings"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            ⚠️ Important Warnings
+          </h2>
+          <div
+            className={`border-l-4 p-6 rounded-r space-y-3 ${
+              isDark
+                ? "bg-yellow-900/20 border-yellow-500"
+                : "bg-yellow-50 border-yellow-500"
+            }`}
+          >
+            {data.warnings.map((warning, idx) => (
               <p
-                className={`text-sm sm:text-base leading-relaxed italic break-words ${
-                  isDark ? "text-neutral-400" : "text-gray-600"
+                key={idx}
+                className={`text-base sm:text-lg leading-relaxed break-words ${
+                  isDark ? "text-neutral-300" : "text-gray-700"
                 }`}
               >
                 <strong
-                  className={isDark ? "text-neutral-300" : "text-gray-700"}
+                  className={isDark ? "text-yellow-400" : "text-yellow-700"}
                 >
-                  Why this matters:
+                  ⚠️
                 </strong>{" "}
-                {example.explanation}
+                {warning}
               </p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* Key Takeaways */}
-      <section>
-        <h2
-          id="key-takeaways"
-          className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
-            isDark ? "text-neutral-100" : "text-gray-900"
-          }`}
-        >
-          Key Takeaways
-        </h2>
-        <ul className="space-y-3">
-          {data.keyTakeaways.map((takeaway, idx) => (
-            <li
-              key={idx}
-              className={`flex items-start text-base sm:text-lg leading-relaxed break-words ${
-                isDark ? "text-neutral-300" : "text-gray-700"
-              }`}
-            >
-              <span
-                className={`mr-3 mt-1 flex-shrink-0 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
-                }`}
-              >
-                ✓
-              </span>
-              <span>{takeaway}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Common Mistakes */}
-      <section>
-        <h2
-          id="common-mistakes"
-          className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
-            isDark ? "text-neutral-100" : "text-gray-900"
-          }`}
-        >
-          Common Mistakes to Avoid
-        </h2>
-        <ul className="space-y-3">
-          {data.commonMistakes.map((mistake, idx) => (
-            <li
-              key={idx}
-              className={`flex items-start text-base sm:text-lg leading-relaxed break-words ${
-                isDark ? "text-neutral-300" : "text-gray-700"
-              }`}
-            >
-              <span
-                className={`mr-3 mt-1 flex-shrink-0 ${
-                  isDark ? "text-red-400" : "text-red-600"
-                }`}
-              >
-                ✗
-              </span>
-              <span>{mistake}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Pro Tips (Optional) */}
+      {/* Pro Tips */}
       {data.tips && data.tips.length > 0 && (
         <section>
           <h2
@@ -217,6 +290,47 @@ export const Section: React.FC<SectionProps> = ({ data, isDark }) => {
               >
                 💡 {tip}
               </p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Interview Questions */}
+      {data.interviewQuestions && data.interviewQuestions.length > 0 && (
+        <section>
+          <h2
+            id="interview-questions"
+            className={`text-2xl sm:text-3xl font-bold mb-6 break-words ${
+              isDark ? "text-neutral-100" : "text-gray-900"
+            }`}
+          >
+            Interview Questions
+          </h2>
+          <div className="space-y-4">
+            {data.interviewQuestions.map((question, idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-lg border ${
+                  isDark
+                    ? "bg-neutral-800 border-neutral-700"
+                    : "bg-gray-50 border-gray-200"
+                }`}
+              >
+                <p
+                  className={`text-base sm:text-lg leading-relaxed break-words ${
+                    isDark ? "text-neutral-300" : "text-gray-700"
+                  }`}
+                >
+                  <span
+                    className={`font-semibold ${
+                      isDark ? "text-blue-400" : "text-blue-600"
+                    }`}
+                  >
+                    Q{idx + 1}:
+                  </span>{" "}
+                  {question}
+                </p>
+              </div>
             ))}
           </div>
         </section>

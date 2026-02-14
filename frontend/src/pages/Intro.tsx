@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { productionContent } from "../data/docsContent";
+import { gitContent } from "../data/docsContent";
 import { formatDate } from "../utils/formatDate";
 import { slugify } from "../utils/slugify";
 import { Helmet } from "react-helmet-async";
@@ -10,9 +10,7 @@ interface IntroProps {
 }
 
 export const Intro: React.FC<IntroProps> = ({ isDark }) => {
-  const categories = Array.from(
-    new Set(productionContent.map((i) => i.category)),
-  );
+  const categories = Array.from(new Set(gitContent.map((i) => i.category)));
 
   return (
     <>
@@ -24,11 +22,11 @@ export const Intro: React.FC<IntroProps> = ({ isDark }) => {
           name="description"
           content="Master Git and GitHub with our comprehensive guide. Learn version control, branching, collaboration, and professional development workflows."
         />
-        <link rel="canonical" href="https://production-code.com/" />
+        <link rel="canonical" href="https://git-and-github-docs.vercel.app/" />
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://production-code.com/" />
+        <meta property="og:url" content="https://git-and-github-docs.vercel.app/" />
         <meta
           property="og:title"
           content="Git &amp; GitHub Master Guide | Complete Version Control Documentation"
@@ -39,12 +37,12 @@ export const Intro: React.FC<IntroProps> = ({ isDark }) => {
         />
         <meta
           property="og:image"
-          content="https://production-code.com/og-image.png"
+          content="https://git-and-github-docs.vercel.app/images/og-image.png"
         />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content="https://production-code.com/" />
+        <meta name="twitter:url" content="https://git-and-github-docs.vercel.app/" />
         <meta
           name="twitter:title"
           content="Git &amp; GitHub Master Guide | Complete Version Control Documentation"
@@ -55,7 +53,7 @@ export const Intro: React.FC<IntroProps> = ({ isDark }) => {
         />
         <meta
           name="twitter:image"
-          content="https://production-code.com/og-image.png"
+          content="https://git-and-github-docs.vercel.app/images/og-image.png"
         />
       </Helmet>
       {/* Hero Header */}
@@ -81,7 +79,7 @@ export const Intro: React.FC<IntroProps> = ({ isDark }) => {
             isDark ? "text-neutral-400" : "text-gray-600"
           }`}
         >
-          This comprehensive guide covers {productionContent.length} topics in
+          This comprehensive guide covers {gitContent.length} topics in
           chronological order. Start with Git fundamentals and progress through
           GitHub workflows to become a version control expert.
         </p>
@@ -118,7 +116,7 @@ export const Intro: React.FC<IntroProps> = ({ isDark }) => {
               </span>
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {productionContent
+              {gitContent
                 .filter((item) => item.category === category)
                 .map((item) => (
                   <Link

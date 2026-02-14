@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { Sidebar } from "../components/Sidebar";
 import { MobileMenu } from "../components/MobileMenu";
-import { productionContent } from "../data/docsContent";
+import { gitContent } from "../data/docsContent";
 import { OnThisPage } from "../components/OnThisPage";
 
 interface DocsLayoutProps {
@@ -25,14 +25,14 @@ export const DocsLayout: React.FC<DocsLayoutProps> = ({
 
       {/* Desktop sidebar (hidden on < lg) */}
       <Sidebar
-        sections={productionContent}
+        sections={gitContent}
         isDark={isDark}
         toggleTheme={toggleTheme}
       />
 
       {/* Mobile fullscreen menu */}
       <MobileMenu
-        sections={productionContent}
+        sections={gitContent}
         isOpen={isMobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         isDark={isDark}

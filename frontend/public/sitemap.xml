@@ -1,67 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://production-code.com/</loc>
+    <loc>https://git-and-github-docs.vercel.app/</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/separation-of-concerns</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-commit</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/reusability</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-init</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/naming-conventions</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-clone</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/error-handling</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-status</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/async-patterns</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-add</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/state-management</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-pull</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/testing-strategies</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-fetch</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/performance-optimization</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-push</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/security-best-practices</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-remote</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://production-code.com/docs/accessibility</loc>
+    <loc>https://git-and-github-docs.vercel.app/docs/git-history-log</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
