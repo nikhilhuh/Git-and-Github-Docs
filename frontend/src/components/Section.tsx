@@ -235,7 +235,7 @@ export const Section: React.FC<SectionProps> = ({ data, isDark }) => {
               isDark ? "text-neutral-100" : "text-gray-900"
             }`}
           >
-            ⚠️ Important Warnings
+            Important Warnings
           </h2>
           <div
             className={`border-l-4 p-6 rounded-r space-y-3 ${
