@@ -458,6 +458,12 @@ export const gitContent: ContentSection[] = [
         explanation: "Installs Git using Chocolatey package manager.",
       },
       {
+        label: "Windows (Update Existing)",
+        language: "bash",
+        code: "git update-git-for-windows",
+        explanation: "Updates Git to the latest version (Git Bash only).",
+      },
+      {
         label: "Linux (Debian/Ubuntu)",
         language: "bash",
         code: "sudo apt update\nsudo apt install git",
@@ -618,6 +624,13 @@ export const gitContent: ContentSection[] = [
         code: 'git config --local user.name "Project Specific Name"',
         explanation:
           "Overrides global identity only for the current repository.",
+      },
+      {
+        label: "Windows Credential Manager",
+        language: "bash",
+        code: "git config --global credential.helper manager",
+        explanation:
+          "Stores credentials securely in Windows Credential Manager.",
       },
       {
         label: "Windows Line Endings (CRLF)",
@@ -3132,72 +3145,98 @@ export const gitContent: ContentSection[] = [
     title: "What is Rebase",
     description:
       "Learn how rebasing moves commits to a new base, creating a linear history alternative to merging.",
+
     overview:
-      "Rebasing is the process of moving or combining a sequence of commits to a new base commit. Unlike merging which preserves history exactly as it happened, rebasing rewrites commit history to create a cleaner, linear progression of changes. This is powerful but must be used carefully.",
+      "Rebasing is the process of moving a sequence of commits to a new base commit. Instead of preserving branch structure like a merge does, rebase rewrites commit history to create a clean, linear progression of changes. It is powerful for maintaining tidy history but must be used carefully.",
+
     detailedExplanation: [
-      "When you rebase, Git takes the commits from your current branch, temporarily removes them, updates your branch to match the target branch, then replays your commits one by one on top of it. This makes it appear as if you created your branch from the latest commit of the target branch.",
-      "Rebasing creates new commits with different SHAs, even though the changes are the same. This is because the parent commit has changed. This history rewriting is why rebasing should never be done on public/shared branches - it can cause serious problems for collaborators.",
-      "The golden rule of rebasing: never rebase commits that have been pushed to a public repository and that others may have based work on. Rebasing is safe and beneficial for cleaning up your local commits before pushing.",
-      "Rebasing is often used to keep feature branches up to date with the main branch. Instead of merging main into your feature branch repeatedly (creating merge commits), you can rebase your feature branch onto main for a cleaner history.",
+      "When you run git rebase, Git temporarily removes the commits from your current branch, updates your branch to match the target branch, and then reapplies (replays) your commits one by one on top of the new base. The result looks as if your work started from the latest commit of the target branch.",
+
+      "Rebasing creates entirely new commits with new SHA hashes. Even though the changes may be identical, the parent commit is different, so Git treats them as new commits. This is why rebase is considered history rewriting.",
+
+      "Because rebase rewrites history, it should not be used on public branches that others depend on. Rebasing shared commits can force collaborators to reconcile duplicated or rewritten history, causing confusion and conflicts.",
+
+      "Rebasing is commonly used to keep feature branches up to date with the main branch. Instead of repeatedly merging main into your feature branch (which creates merge commits), you can rebase your feature branch onto main to maintain a clean, linear history.",
+
+      "Interactive rebase allows you to modify commit history intentionally — for example, squashing multiple commits into one, editing commit messages, or reordering commits before pushing.",
     ],
+
     codeBlocks: [
       {
-        label: "Basic rebase",
+        label: "Basic rebase onto main",
         language: "bash",
-        code: "git checkout feature-branch\ngit rebase main",
-        explanation: "Replays feature-branch commits on top of main",
+        code: "git switch feature-branch\ngit rebase main",
+        explanation: "Replays feature branch commits on top of main.",
       },
       {
-        label: "Rebase with conflicts",
+        label: "Handling conflicts during rebase",
         language: "bash",
-        code: "git rebase main\n# If conflicts occur:\n# 1. Resolve conflicts in files\n# 2. git add resolved-files\n# 3. git rebase --continue",
-        explanation: "Handle conflicts during rebase and continue",
+        code: "git rebase main\n# Resolve conflicts\n# git add resolved-files\n# git rebase --continue",
+        explanation:
+          "Resolve conflicts, stage changes, then continue rebasing.",
       },
       {
-        label: "Abort rebase",
+        label: "Abort a rebase",
         language: "bash",
         code: "git rebase --abort",
-        explanation: "Cancel rebase and return to original state",
+        explanation:
+          "Cancels the rebase and restores the branch to its original state.",
+      },
+      {
+        label: "Interactive rebase",
+        language: "bash",
+        code: "git rebase -i HEAD~3",
+        explanation:
+          "Interactively modify the last 3 commits (squash, reword, reorder).",
       },
       {
         label: "Rebase onto specific commit",
         language: "bash",
-        code: "git rebase abc1234",
-        explanation: "Rebase current branch onto commit abc1234",
-      },
-      {
-        label: "Interactive rebase (clean history)",
-        language: "bash",
-        code: "git rebase -i HEAD~3",
-        explanation:
-          "Interactively rebase last 3 commits (squash, reword, etc.)",
+        code: "git rebase <commit-hash>",
+        explanation: "Replays current branch commits onto a specific commit.",
       },
     ],
+
+    workflowSteps: [
+      "Switch to the branch you want to rebase",
+      "Run git rebase <target-branch>",
+      "If conflicts occur, resolve them manually",
+      "Stage resolved files with git add",
+      "Run git rebase --continue",
+      "Repeat until rebase completes",
+      "Test your code after rebasing",
+    ],
+
     keyTakeaways: [
-      "Rebase replays commits on a new base, creating linear history",
-      "Rebasing rewrites commit history (creates new SHAs)",
-      "NEVER rebase commits that others have based work on",
-      "Safe for cleaning local commits before pushing",
-      "Alternative to merging that creates cleaner history",
+      "Rebase replays commits onto a new base",
+      "Rebasing rewrites commit history and creates new SHAs",
+      "Use rebase to maintain clean, linear history",
+      "Never rebase commits that others depend on",
+      "Interactive rebase allows history cleanup before pushing",
     ],
+
     commonMistakes: [
-      "Rebasing public/shared branches and breaking others' work",
-      "Not understanding that rebase rewrites history",
-      "Giving up when conflicts occur instead of resolving them",
-      "Using rebase when merge would be more appropriate",
-      "Not knowing how to abort a rebase gone wrong",
+      "Rebasing shared or public branches",
+      "Not understanding that rebase creates new commit hashes",
+      "Force pushing without understanding consequences",
+      "Abandoning rebase when conflicts occur instead of resolving them",
+      "Using rebase when merge would be safer in team workflows",
     ],
+
     tips: [
-      "Use rebase for local cleanup before pushing",
-      "When in doubt, merge instead of rebase",
-      "Use git rebase -i to clean up messy commit history",
-      "Learn to use git rebase --abort to undo",
+      "Use rebase to clean up local commits before pushing",
+      "When collaborating, prefer merge if unsure",
+      "Use interactive rebase to squash or edit commits",
+      "Use git rebase --abort if something goes wrong",
     ],
+
     warnings: [
-      "DO NOT rebase commits that exist on public branches others use",
-      "Rebasing rewrites history - can't easily be undone without reflog",
-      "Force push required after rebasing pushed commits (dangerous!)",
+      "Do NOT rebase commits that have been pushed to shared branches",
+      "Rebasing rewrites history and may require force pushing",
+      "Force pushing after rebase can overwrite remote history if not careful",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "merge-vs-rebase",
@@ -3205,134 +3244,257 @@ export const gitContent: ContentSection[] = [
     title: "Merge vs Rebase",
     description:
       "Compare merging and rebasing to understand when to use each approach for integrating changes.",
+
     overview:
-      "Both merge and rebase integrate changes from one branch into another, but they do it differently. Merging preserves history exactly as it happened with merge commits. Rebasing rewrites history to create a linear progression. Understanding when to use each is crucial for maintaining clean, understandable Git history.",
+      "Both merge and rebase integrate changes from one branch into another, but they do so differently. Merging preserves the true development history by creating a merge commit, while rebasing rewrites history to produce a clean, linear sequence of commits. Choosing the right approach depends on your workflow and collaboration needs.",
+
     detailedExplanation: [
-      "Merging creates a new commit that ties together two branches, preserving the complete history including when branches diverged and merged. The result is a non-linear history showing the actual development timeline. This is truthful to what happened but can become complex in active projects.",
-      "Rebasing moves your commits to a new base, rewriting history to make it appear as if you'd worked from the latest commit all along. This creates a linear history that's easier to follow but doesn't show when branches actually diverged. Each rebased commit gets a new SHA.",
-      "The choice impacts collaboration: merging is safe for shared branches because it doesn't rewrite history. Rebasing should only be done on private commits because rewriting shared history causes problems for collaborators.",
-      "Many teams use both strategically: rebase private feature branches to stay updated with main, then merge the feature branch into main with a merge commit to preserve the feature boundary in history.",
+      "Merging combines two branches by creating a new merge commit that has two parent commits. This preserves the exact historical timeline, including when branches diverged and when they were merged back together. The result is a non-linear history that accurately reflects collaboration.",
+
+      "Rebasing, in contrast, rewrites history. It moves commits from one branch and reapplies them on top of another branch. This eliminates merge commits and creates a linear commit history. However, each rebased commit receives a new SHA because its parent changes.",
+
+      "The key difference lies in history preservation versus history rewriting. Merge keeps history intact and is safe for shared branches. Rebase modifies commit history and should only be used on private or local branches.",
+
+      "From a collaboration perspective, merging is safer in team environments because it does not alter existing commits. Rebasing shared commits requires force pushing and can disrupt teammates' work if not handled carefully.",
+
+      "Many professional workflows combine both approaches: developers rebase their local feature branches to keep them up to date with main, then merge the completed feature branch into main using a merge commit to preserve feature boundaries.",
     ],
+
     codeBlocks: [
       {
-        label: "Merge creates merge commit",
+        label: "Merge example",
         language: "bash",
-        code: "git checkout main\ngit merge feature-branch\n# Creates: 'Merge branch feature-branch into main'",
-        explanation: "Preserves branch history with merge commit",
+        code: "git switch main\ngit merge feature-branch",
+        explanation: "Creates a merge commit that preserves branch structure.",
       },
       {
-        label: "Rebase creates linear history",
+        label: "Rebase example",
         language: "bash",
-        code: "git checkout feature-branch\ngit rebase main\n# Replays feature commits on top of main",
-        explanation: "Rewrites commits for linear history",
+        code: "git switch feature-branch\ngit rebase main",
+        explanation:
+          "Replays feature commits on top of main, creating linear history.",
       },
       {
         label: "Visualize merge history",
         language: "bash",
-        code: "git log --graph --oneline\n# Shows branching and merging",
-        explanation: "Merge preserves branch structure",
+        code: "git log --oneline --graph --all",
+        explanation: "Shows non-linear history with merge commits.",
       },
       {
-        label: "Visualize rebase history",
+        label: "Pull with rebase",
         language: "bash",
-        code: "git log --graph --oneline\n# Shows linear progression",
-        explanation: "Rebase creates straight line",
+        code: "git pull --rebase",
+        explanation:
+          "Fetches changes and rebases your local commits on top of remote branch.",
       },
     ],
+
+    workflowSteps: [
+      "Use merge when working on shared/public branches",
+      "Use rebase to update private feature branches",
+      "Avoid rebasing commits already pushed to shared repositories",
+      "Test thoroughly after either merge or rebase",
+      "Push changes carefully (force push only when absolutely necessary)",
+    ],
+
     keyTakeaways: [
-      "Merge preserves history, rebase rewrites it",
-      "Merge creates merge commits, rebase creates linear history",
-      "Merge is safe for public branches, rebase only for private work",
-      "Rebase creates cleaner history but loses information about when branches diverged",
-      "Many workflows use both: rebase locally, merge to main",
+      "Merge preserves complete branch history",
+      "Rebase rewrites history to create linear progression",
+      "Merge is safe for shared branches",
+      "Rebase should only be used on private commits",
+      "Many teams rebase locally and merge into main",
     ],
+
     commonMistakes: [
-      "Rebasing public/shared branches",
-      "Always using merge and creating messy history",
-      "Always using rebase and losing important context",
-      "Not understanding the trade-offs of each approach",
+      "Rebasing shared branches and disrupting collaborators",
+      "Using merge excessively and creating cluttered history",
+      "Not understanding that rebase creates new commit SHAs",
+      "Force pushing without understanding consequences",
     ],
+
     tips: [
-      "When in doubt, merge (it's safer)",
-      "Rebase private branches to keep updated with main",
-      "Merge feature branches into main to preserve feature boundaries",
-      "Use git pull --rebase for clean updates",
+      "When unsure, prefer merge (safer option)",
+      "Rebase local branches to keep history clean",
+      "Use --no-ff merge to preserve feature boundaries",
+      "Discuss team conventions before choosing a workflow",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "interactive-rebase",
     category: "Rebase",
     title: "Interactive Rebase",
     description:
-      "Clean up your commit history by squashing, rewording, improving, or reordering commits.",
+      "Clean up your commit history by squashing, rewording, editing, reordering, or removing commits.",
     overview:
-      "Interactive rebase (git rebase -i) is a powerful tool for polishing your commit history. It opens a text editor showing a list of commits, allowing you to modify them before they become permanent. You can combine (squash) multiple small commits into one, change commit messages, delete accidental commits, or reorder them.",
+      "Interactive rebase (git rebase -i) is a powerful Git feature used to rewrite and polish commit history before sharing it. It opens an editor listing selected commits and allows you to modify how they appear in history. This helps create clean, meaningful, and professional commit logs.",
     detailedExplanation: [
-      "When you start an interactive rebase, Git presents a script of commits. Use commands like 'pick' (keep as is), 'reword' (change message), 'edit' (pause to modify content), 'squash' (combine with previous), 'fixup' (combine but discard message), and 'drop' (remove commit).",
-      "This is perfect for cleaning up a feature branch before merging. You might have 10 'WIP' commits that can be squashed into one clean 'Implement feature X' commit. This creates a professional and understandable project history.",
-      "Interactive rebase rewrites history, so it follows the same golden rule: never use it on public commits that others depend on. It is meant for local cleanup of your own work.",
-      "If you make a mistake during the interactive session, you can always abort with 'git rebase --abort' and try again.",
+      "Running 'git rebase -i <base>' opens a list of commits in your default editor. Each commit can be modified using specific commands like pick, reword, edit, squash, fixup, or drop.",
+      "The 'pick' command keeps a commit unchanged. 'reword' allows editing only the commit message. 'edit' pauses the rebase to let you modify the commit content using 'git commit --amend'.",
+      "'squash' combines a commit with the previous one and allows you to edit the combined commit message. 'fixup' also combines commits but discards the second commit’s message.",
+      "'drop' removes a commit completely from history. You can also reorder commits simply by rearranging lines in the editor.",
+      "Because interactive rebase rewrites history and creates new commit SHAs, it must only be used on local or private branches. Never rebase commits that have already been pushed to shared branches.",
     ],
     codeBlocks: [
       {
         label: "Start interactive rebase (last 3 commits)",
         language: "bash",
         code: "git rebase -i HEAD~3",
-        explanation: "Opens editor with last 3 commits to modify",
+        explanation:
+          "Opens an editor showing the last 3 commits for modification",
       },
       {
         label: "Squash commits (in editor)",
         language: "bash",
         code: "pick 12345 Implement feature part 1\nsquash 67890 WIP part 2\nsquash abcde Fix typo",
-        explanation: "Combines 3 commits into one, prompting for new message",
+        explanation:
+          "Combines multiple commits into one and lets you edit the final message",
       },
       {
-        label: "Reword a specific commit",
+        label: "Reword a commit message",
         language: "bash",
         code: "reword 12345 Fix authentication bug",
-        explanation: "Allows you to modify the commit message only",
-      },
-      {
-        label: "Drop a commit",
-        language: "bash",
-        code: "drop 12345 Bad commit",
-        explanation: "Removes the commit entirely from history",
+        explanation: "Changes only the commit message",
       },
       {
         label: "Edit a previous commit",
         language: "bash",
-        code: "edit 12345 Forgot to add file",
-        explanation: "Pauses rebase to let you amend this specific commit",
+        code: "edit 12345 Forgot to add file\n# After pause\ngit add missing-file.js\ngit commit --amend\ngit rebase --continue",
+        explanation: "Pauses rebase to modify commit content",
+      },
+      {
+        label: "Abort rebase if needed",
+        language: "bash",
+        code: "git rebase --abort",
+        explanation: "Cancels the rebase and restores original state",
       },
     ],
     keyTakeaways: [
-      "Interactive rebase lets you edit history: squash, reword, drop, reorder",
-      "Use 'squash' or 'fixup' to combine multiple WIP commits",
-      "Use 'reword' to fix typos in commit messages",
-      "Perfect for cleaning up branches before merging",
-      "Rewrites history - only for local/private branches",
+      "Interactive rebase is used to rewrite and clean commit history",
+      "Use squash or fixup to combine small WIP commits",
+      "Use reword to improve commit messages",
+      "Only use on private/local branches",
+      "Always verify history with git log after rebasing",
     ],
     commonMistakes: [
-      "Squashing commits that have already been pushed to shared branch",
-      "Accidentally dropping commits by deleting lines in the editor",
-      "Creating conflicts by reordering dependent commits",
-      "Not inspecting the history after rebase to confirm correctness",
+      "Rebasing commits that were already pushed to a shared branch",
+      "Accidentally dropping commits during reordering",
+      "Forgetting to run 'git rebase --continue' after resolving conflicts",
+      "Not checking final history before pushing",
     ],
     tips: [
-      "Use 'fixup' (f) instead of 'squash' (s) if you don't need to edit the message",
-      "git rebase -i --root allows rebasing all commits from start",
-      "Configure your preferred editor (VS Code, Nano, Vim) for git",
+      "Use 'fixup' when you don’t want to edit commit messages",
+      "Use 'git log --oneline' before rebasing to plan changes",
+      "Configure a comfortable Git editor (VS Code, Nano, Vim)",
+      "Use 'git push --force-with-lease' (not --force) after rebasing pushed commits",
+    ],
+  },
+  {
+    id: "cherry-pick",
+    category: "Rebase",
+    title: "Cherry Pick",
+    description:
+      "Select specific commits from one branch and apply them to another.",
+    overview:
+      "Cherry-picking allows you to pick a single commit (or a few) from a different branch and apply it to your current branch. This is useful for apply hotfixes to multiple branches (e.g., v1.0 and v2.0) or retrieving a specific change without merging the whole branch.",
+    detailedExplanation: [
+      "Command: `git cherry-pick <commit-sha>`",
+      "This copies the changes from that commit and creates a NEW commit with a new SHA on your current branch. It introduces the same change but is technically a different commit object.",
+      "Useful for 'Backporting': fixing a bug in 'main' and cherry-picking that fix into a 'release-v1' branch.",
+    ],
+    codeBlocks: [
+      {
+        label: "Cherry pick a single commit",
+        language: "bash",
+        code: "git cherry-pick abc1234",
+        explanation: "Applies commit abc1234 to current branch",
+      },
+      {
+        label: "Cherry pick multiple commits",
+        language: "bash",
+        code: "git cherry-pick abc1234 def5678",
+        explanation: "Applies multiple commits in order",
+      },
+      {
+        label: "Resolve conflicts",
+        language: "bash",
+        code: "git cherry-pick --continue\n# or\ngit cherry-pick --abort",
+        explanation: "Standard conflict resolution workflow",
+      },
+    ],
+    keyTakeaways: [
+      "Selective merging of specific commits",
+      "Creates new commits (duplicate capability, different SHA)",
+      "Great for hotfixes and backporting",
+      "Can cause duplicate commit noise if branches are later merged",
+    ],
+    commonMistakes: [
+      "Cherry-picking commits that are eventually going to be merged anyway",
+      "Cherry-picking a commit but forgetting its dependencies",
+      "Confusing cherry-pick with merge",
+    ],
+    tips: [
+      "Use -x flag (`git cherry-pick -x`) to append 'cherry picked from commit...' to message",
+      "Don't cherry-pick if you can merge",
+      "Great for undoing a mistake: cherry-pick the reverting commit",
     ],
   },
   {
     id: "rebase-interview-questions",
     category: "Rebase",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions covering Git rebase concepts, history rewriting, conflicts, and best practices.",
+
+    overview:
+      "This section contains frequently asked interview questions about Git rebase. It covers standard rebase operations, interactive rebase, conflict handling, history rewriting risks, and real-world workflow decisions in collaborative environments.",
+
+    detailedExplanation: [
+      "Interviewers often test your understanding of how rebase integrates changes by replaying commits onto a new base. You should clearly explain how rebase differs from merge in terms of history structure.",
+
+      "You should understand why rebasing rewrites commit history and changes commit SHAs. Explaining the internal concept of replaying commits demonstrates deeper Git knowledge.",
+
+      "You may be asked about interactive rebase and how it is used to squash, reword, reorder, or drop commits before merging a feature branch.",
+
+      "Practical questions often focus on handling conflicts during rebase, when to use git pull --rebase, and the risks of rebasing shared branches in team workflows.",
+    ],
+
+    keyTakeaways: [
+      "Rebase replays commits onto a new base to create linear history",
+      "Rebasing rewrites history and changes commit SHAs",
+      "Never rebase shared/public branches",
+      "Interactive rebase is used to clean up commits before merging",
+      "Understanding merge vs rebase is essential in interviews",
+    ],
+
+    commonMistakes: [
+      "Confusing rebase with merge",
+      "Saying rebase deletes commits instead of rewriting them",
+      "Not explaining why SHAs change after rebase",
+      "Rebasing public branches in collaborative workflows",
+      "Not knowing how to continue or abort a conflicted rebase",
+    ],
+
+    interviewQuestions: [
+      "What is git rebase?",
+      "How is git rebase different from git merge?",
+      "What happens internally when you run git rebase main?",
+      "Why does rebasing change commit SHAs?",
+      "When should you use rebase instead of merge?",
+      "Why is rebasing shared branches dangerous?",
+      "What is interactive rebase?",
+      "What is the difference between squash and fixup?",
+      "How do you resolve conflicts during a rebase?",
+      "How do you abort an ongoing rebase?",
+      "What is the difference between git pull and git pull --rebase?",
+      "What is the golden rule of rebasing?",
+      "What does git rebase --onto do?",
+      "When would you use rebase in a team workflow?",
+      "What is force push and why is --force-with-lease safer after rebase?",
+    ],
+
+    lastUpdated: "2026-02-14",
   },
 
   // ===== STASH =====
@@ -3342,154 +3504,222 @@ export const gitContent: ContentSection[] = [
     title: "git stash",
     description:
       "Temporarily save uncommitted changes to switch contexts without committing incomplete work.",
+
     overview:
-      "The git stash command lets you save your uncommitted changes (both staged and unstaged) temporarily and reverts your working directory to match the HEAD commit. This is perfect when you need to switch branches quickly but aren't ready to commit your current work.",
+      "The git stash command temporarily saves your uncommitted changes (staged and unstaged) and restores your working directory to match the latest commit (HEAD). This allows you to switch branches or pull updates without committing unfinished work.",
+
     detailedExplanation: [
-      "Stashing takes your modified tracked files and staged changes and saves them on a stack of unfinished changes that you can reapply at any time. Your working directory becomes clean, matching the last commit, allowing you to safely switch branches or pull changes.",
-      "The stash is local to your repository - it's never transferred when you push or pull. Each stash is stored as a commit with two parents: one for the staged changes and one for the unstaged changes. You can have multiple stashes and choose which one to apply later.",
-      "By default, git stash only saves tracked files. Untracked and ignored files are not stashed unless you use special flags. This prevents accidentally stashing build artifacts or temporary files.",
-      "Stashing is particularly useful when you're in the middle of something and need to quickly fix a bug, review someone else's code, or switch context without losing your work-in-progress.",
+      "Stashing saves your modified tracked files and staged changes onto a stack. After stashing, your working directory becomes clean, matching the latest commit. You can later reapply the saved changes when you're ready to continue.",
+
+      "Each stash entry is stored locally in your repository and is not pushed to remote. Internally, Git creates a special commit object representing your working directory and index state at the time of stashing.",
+
+      "By default, git stash only saves tracked files. Untracked files require the -u or --include-untracked flag, and ignored files require -a or --all.",
+
+      "Stashing is useful when you need to quickly switch context, fix urgent bugs, review code, or pull changes without committing incomplete or messy work.",
+
+      "You can apply a stash without removing it (git stash apply) or apply and remove it from the stash stack (git stash pop).",
     ],
+
     codeBlocks: [
       {
         label: "Stash current changes",
         language: "bash",
-        code: "git stash\n# or with a message:\ngit stash save 'WIP: implementing login'",
-        explanation: "Saves uncommitted changes and cleans working directory",
+        code: "git stash",
+        explanation: "Saves tracked changes and cleans working directory",
       },
       {
-        label: "Stash including untracked files",
+        label: "Stash with descriptive message",
+        language: "bash",
+        code: "git stash push -m 'WIP: implementing login feature'",
+        explanation: "Modern syntax for stashing with a message",
+      },
+      {
+        label: "Include untracked files",
         language: "bash",
         code: "git stash -u\n# or\ngit stash --include-untracked",
         explanation: "Stashes tracked and untracked files",
       },
       {
-        label: "Stash with message",
+        label: "List stashes",
         language: "bash",
-        code: "git stash push -m 'Feature half done, switching to hotfix'",
-        explanation: "Modern syntax for stashing with descriptive message",
+        code: "git stash list",
+        explanation: "Displays all saved stashes with index references",
       },
       {
-        label: "Stash specific files",
+        label: "View stash details",
         language: "bash",
-        code: "git stash push -m 'Partial work' path/to/file.js",
-        explanation: "Stash only specific files",
+        code: "git stash show -p stash@{0}",
+        explanation: "Shows detailed diff of a specific stash",
       },
       {
-        label: "List all stashes",
+        label: "Apply a stash",
         language: "bash",
-        code: "git stash list\n# Output:\n# stash@{0}: WIP on main: a3b4c5d Fix bug\n# stash@{1}: WIP on feature: 1234567 Add login",
-        explanation: "Shows all stashes with their index and description",
+        code: "git stash apply stash@{0}",
+        explanation: "Reapplies stash without removing it from the stack",
       },
       {
-        label: "View stash contents",
+        label: "Pop a stash",
         language: "bash",
-        code: "git stash show stash@{0}\n# or detailed diff:\ngit stash show -p stash@{0}",
-        explanation: "See what changes are in a specific stash",
+        code: "git stash pop",
+        explanation: "Applies latest stash and removes it from the stack",
+      },
+      {
+        label: "Drop a stash",
+        language: "bash",
+        code: "git stash drop stash@{0}",
+        explanation: "Deletes a specific stash entry",
       },
     ],
+
     workflowSteps: [
-      "Make some changes but don't commit",
-      "Need to switch context (e.g., fix urgent bug)",
-      "Run git stash to save changes and clean working directory",
-      "Switch branch or pull latest changes",
-      "Do other work and commit",
-      "Return to original context and apply stash with git stash pop",
+      "Make changes but do not commit",
+      "Need to switch branches or pull updates",
+      "Run git stash to temporarily save changes",
+      "Switch branch or perform other tasks",
+      "Return and reapply changes using git stash pop or git stash apply",
     ],
+
     keyTakeaways: [
       "git stash temporarily saves uncommitted changes",
       "Stashes are stored locally and not pushed to remote",
-      "You can have multiple stashes and choose which to apply",
-      "By default only tracked files are stashed",
-      "Stash is perfect for quickly switching context",
+      "Multiple stashes are stored in a stack structure",
+      "By default, only tracked files are stashed",
+      "Use pop to apply and remove, apply to keep stash",
     ],
+
     commonMistakes: [
-      "Forgetting you have stashed changes and losing track of them",
-      "Not using descriptive messages, making stashes hard to identify",
+      "Forgetting about stashed changes",
+      "Not using descriptive messages for multiple stashes",
       "Expecting untracked files to be stashed automatically",
-      "Stashing instead of committing when you should just commit",
-      "Confusing stash pop with stash apply",
+      "Using stash instead of committing properly structured work",
+      "Confusing git stash apply with git stash pop",
     ],
+
     tips: [
-      "Always use descriptive messages: git stash save 'description'",
-      "Use git stash list regularly to see what you have stashed",
-      "Clean out old stashes with git stash clear when done",
-      "Prefer committing over stashing when possible",
+      "Use descriptive messages with git stash push -m",
+      "Use git stash list regularly to track saved work",
+      "Clear unused stashes with git stash clear",
+      "Prefer committing logical work instead of relying heavily on stash",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "apply-stash",
     category: "Stash",
     title: "Apply Stash",
     description:
-      "Retrieve stashed changes and apply them to your working directory.",
+      "Retrieve stashed changes and apply them back to your working directory.",
+
     overview:
-      "Applying a stash takes the changes saved in a stash and reapplies them to your current working directory. You can choose to keep the stash in the list (apply) or remove it after applying (pop). You can apply changes to the same branch or a different one.",
+      "Applying a stash restores previously saved changes into your current working directory. You can either keep the stash entry after applying it (apply) or remove it automatically (pop). Stashes can be applied to the same branch or a completely different branch.",
+
     detailedExplanation: [
-      "The most common command is 'git stash pop', which applies the latest stash and then deletes it from the stack if successful. This is like 'moving' the changes back to your workspace.",
-      "'git stash apply' is safer: it applies the changes but keeps the stash in the list. This is useful if you want to apply the same stash to multiple branches or if you want to be safe in case something goes wrong.",
-      "You can apply a specific stash by index (e.g., 'stash@{2}'). By default, Git attempts to merge stashed changes with your current files. If there are conflicts, Git will mark them just like a merge conflict.",
-      "Stashed changes lose their 'staged' status by default. Use the '--index' option to restore the staged/unstaged status of files exactly as it was when you stashed them.",
+      "The most commonly used command is 'git stash pop'. It applies the latest stash and removes it from the stash stack if the operation succeeds. This effectively moves the saved changes back into your working directory.",
+
+      "'git stash apply' is a safer alternative. It applies the stash but keeps it in the stash list, allowing you to reuse it or retry in case conflicts occur.",
+
+      "You can apply a specific stash by referencing its index (e.g., 'stash@{2}'). Git will attempt to merge the stashed changes with your current working directory. If conflicts occur, they must be resolved manually just like merge conflicts.",
+
+      "By default, applying a stash restores file changes but not their staged/unstaged state. Use the '--index' option to restore the exact index state as it was when the stash was created.",
+
+      "If applying a stash becomes complex due to conflicts, you can create a new branch directly from the stash using 'git stash branch <branch-name>'.",
     ],
+
     codeBlocks: [
       {
-        label: "Pop latest stash (apply & delete)",
+        label: "Pop latest stash (apply and remove)",
         language: "bash",
         code: "git stash pop",
-        explanation: "Restores changes and removes them from stash list",
+        explanation:
+          "Applies the most recent stash and removes it from the stash list",
       },
       {
         label: "Apply latest stash (keep in list)",
         language: "bash",
         code: "git stash apply",
-        explanation: "Restores changes but keeps stash for reuse",
+        explanation: "Applies the most recent stash but keeps it saved",
       },
       {
         label: "Apply specific stash",
         language: "bash",
         code: "git stash apply stash@{2}",
-        explanation: "Applies the 3rd stash in the list",
+        explanation: "Applies a specific stash by its index number",
       },
       {
         label: "Restore staged state",
         language: "bash",
         code: "git stash apply --index",
-        explanation: "Restores files to their staged/unstaged state",
+        explanation: "Restores files along with their staged/unstaged state",
+      },
+      {
+        label: "Create branch from stash",
+        language: "bash",
+        code: "git stash branch new-feature stash@{0}",
+        explanation:
+          "Creates a new branch and applies the selected stash to it",
       },
     ],
+
     keyTakeaways: [
-      "pop = apply + drop (removes stash)",
-      "apply = keep stash in list (safer)",
-      "Can apply stash to any branch, not just the original one",
-      "Conflicts can occur if files changed since stashing",
-      "Use --index to restore staged files",
+      "pop = apply + drop (removes stash after applying)",
+      "apply keeps the stash entry (safer option)",
+      "Stashes can be applied to any branch",
+      "Conflicts may occur during stash application",
+      "Use --index to restore original staged state",
     ],
+
     commonMistakes: [
-      "Using pop and losing the stash if conflict resolution is messy (apply is safer)",
+      "Using pop and losing the stash reference during complex conflict resolution",
       "Applying stash to the wrong branch",
-      "Forgetting stash index numbers change when you drop/pop",
+      "Forgetting that stash indices change after pop or drop",
+      "Not checking stash contents before applying",
     ],
+
     tips: [
-      "Use 'git stash apply' if you might need the stash again",
-      "Create a branch from a stash if conflicts are too hard: git stash branch",
-      "Check 'git stash list' before applying to find the right one",
+      "Use 'git stash apply' if you may need the stash again",
+      "Run 'git stash list' before applying to confirm the correct stash",
+      "Use 'git stash show -p stash@{n}' to inspect changes before applying",
+      "Use 'git stash branch' if conflicts are difficult to resolve manually",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "manage-stash",
     category: "Stash",
     title: "Manage Stash",
     description:
-      "Organize, clean up, and manage your stack of stashed changes.",
+      "Organize, inspect, and clean up your stack of stashed changes effectively.",
+
     overview:
-      "As you work, you might accumulate multiple stashes. Git provides commands to list, inspect, and delete stashes. Managing your stash stack helps you avoid confusion and keeps your workspace clean.",
+      "As you work, you may accumulate multiple stashes. Git provides commands to list, inspect, drop, or clear stashes. Proper stash management prevents confusion and helps maintain a clean and organized workflow.",
+
     detailedExplanation: [
-      "The stash is a stack, meaning latest stashes push older ones down. 'stash@{0}' is always the most recent. The 'git stash list' command shows all available stashes with their indices and messages.",
-      "You can view the contents of a stash without applying it using 'git stash show -p'. This shows the diff of what changed, helping you identify which stash is which.",
-      "Cleaning up is important. You can drop a specific stash with 'git stash drop stash@{n}' or clear all stashes with 'git stash clear'. Be careful with clear - it's irreversible.",
-      "If a stash causes conflicts or you want to isolate it, 'git stash branch <new-branch> stash@{n}' creates a new branch, checks it out, and applies the stash there. This is a very clean way to resume suspended work.",
+      "Git stores stashes in a stack (Last-In, First-Out). The most recent stash is always 'stash@{0}'. When new stashes are created or old ones are removed, the index numbers shift automatically.",
+
+      "You can view all stashes using 'git stash list'. Each entry shows its index, branch reference, and message. Using descriptive messages when stashing makes identification much easier later.",
+
+      "To inspect stash content without applying it, use 'git stash show -p stash@{n}'. This displays the full diff, allowing you to confirm what changes are stored.",
+
+      "You can delete a specific stash using 'git stash drop stash@{n}'. To remove all stashes permanently, use 'git stash clear'. This action cannot be undone, so it should be used carefully.",
+
+      "If you want to resume work cleanly from a stash, use 'git stash branch <branch-name> stash@{n}'. This creates a new branch from the commit where the stash was created and applies the stash automatically.",
     ],
+
     codeBlocks: [
+      {
+        label: "List all stashes",
+        language: "bash",
+        code: "git stash list",
+        explanation: "Displays all stash entries with their indices",
+      },
+      {
+        label: "Show stash diff",
+        language: "bash",
+        code: "git stash show -p stash@{0}",
+        explanation: "Inspect stash content without applying it",
+      },
       {
         label: "Drop specific stash",
         language: "bash",
@@ -3500,49 +3730,95 @@ export const gitContent: ContentSection[] = [
         label: "Clear all stashes",
         language: "bash",
         code: "git stash clear",
-        explanation: "Permanently deletes ALL stashes (Caution!)",
+        explanation: "Permanently deletes ALL stashes (irreversible)",
       },
       {
         label: "Create branch from stash",
         language: "bash",
         code: "git stash branch fix/login-page stash@{0}",
-        explanation: "Creates new branch and pops stash into it",
-      },
-      {
-        label: "Show stash diff",
-        language: "bash",
-        code: "git stash show -p stash@{0}",
-        explanation: "Inspect stash content without applying",
+        explanation: "Creates a new branch and applies the selected stash",
       },
     ],
+
     keyTakeaways: [
-      "Stashes are stored in a stack (LIFO)",
-      "Indices change when newer stashes are added or removed",
-      "Use meaningful messages to make management easier",
-      "git stash clear is permanent - be careful",
-      "Creating a branch from stash is great for conflict avoidance",
+      "Stashes are stored in a LIFO stack structure",
+      "stash@{0} always refers to the most recent stash",
+      "Indices shift when stashes are added or removed",
+      "git stash clear permanently removes all stashes",
+      "git stash branch is useful for isolating complex stashes",
     ],
+
     commonMistakes: [
-      "Accumulating too many stashes and losing track",
-      "Dropping the wrong stash (check index first!)",
-      "Clearing all stashes by accident",
-      "Not checking stash content before applying",
+      "Accumulating too many unnamed stashes",
+      "Dropping the wrong stash without checking contents",
+      "Using git stash clear accidentally",
+      "Not inspecting stash content before applying",
     ],
+
     tips: [
-      "Clean your stash list regularly",
-      "Use 'git stash branch' if a stash applies with conflicts",
-      "Always inspect with 'stash show -p' if unsure",
+      "Use descriptive messages when creating stashes",
+      "Run git stash list regularly to stay organized",
+      "Inspect with git stash show -p before applying",
+      "Prefer creating a branch from stash for large or complex changes",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "stash-interview-questions",
     category: "Stash",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions covering Git stash concepts, usage scenarios, conflict handling, and best practices.",
+
+    overview:
+      "This section contains frequently asked interview questions about Git stash. It covers how stash works internally, when to use it, how to apply or manage stashes, and practical decision-making scenarios in real-world development workflows.",
+
+    detailedExplanation: [
+      "Interviewers often test your understanding of what git stash does and when it should be used instead of committing changes.",
+
+      "You should understand that stash temporarily saves uncommitted tracked changes locally and restores the working directory to match the latest commit.",
+
+      "You may be asked about the difference between 'git stash apply' and 'git stash pop', how to include untracked files, and how stash indices work.",
+
+      "Practical questions often involve resolving conflicts during stash application, creating branches from stashes, or managing multiple stashes effectively.",
+    ],
+
+    keyTakeaways: [
+      "git stash temporarily saves uncommitted changes",
+      "Stashes are stored locally and are not pushed to remote",
+      "pop applies and removes the stash, apply keeps it",
+      "By default, only tracked files are stashed",
+      "Stash is useful for quick context switching",
+    ],
+
+    commonMistakes: [
+      "Using stash instead of making proper commits",
+      "Forgetting about saved stashes",
+      "Not understanding the difference between apply and pop",
+      "Expecting untracked files to be stashed automatically",
+      "Applying stash to the wrong branch without checking",
+    ],
+
+    interviewQuestions: [
+      "What is git stash and why is it used?",
+      "What does git stash do internally?",
+      "What is the difference between git stash apply and git stash pop?",
+      "How do you stash untracked files?",
+      "How can you view the contents of a stash?",
+      "How do you apply a specific stash?",
+      "What happens if conflicts occur during stash pop?",
+      "How do you delete a specific stash?",
+      "What does git stash clear do?",
+      "How do stash indices (stash@{0}, stash@{1}) work?",
+      "Can you apply a stash to a different branch?",
+      "What is git stash branch and when would you use it?",
+      "Is stash shared with remote repositories?",
+      "When should you commit instead of using stash?",
+      "What are common risks of overusing stash?",
+    ],
+
+    lastUpdated: "2026-02-14",
   },
 
   // ===== TAGGING =====
@@ -3550,56 +3826,78 @@ export const gitContent: ContentSection[] = [
     id: "lightweight-tags",
     category: "Tagging",
     title: "Lightweight Tags",
-    description: "Create simple bookmarks to specific commits in history.",
+    description:
+      "Create simple bookmarks that point to specific commits in history.",
+
     overview:
-      "Lightweight tags are the simplest form of tagging in Git. They are essentially just a name that points to a specific commit, similar to a branch that doesn't move. They are useful for temporary labels or private bookmarks in your development history.",
+      "Lightweight tags are the simplest type of Git tag. They act as a static pointer to a specific commit, similar to a branch that does not move. They are commonly used for temporary markers, quick references, or private bookmarks in development history.",
+
     detailedExplanation: [
-      "A lightweight tag is just a file in the .git/refs/tags directory containing the commit checksum. It doesn't contain any extra information like the tagger's name, email, date, or a tagging message.",
-      "These tags are typically used for local or temporary milestones where you don't need a permanent, verified history. For releases and significant version points, annotated tags are preferred.",
-      "Since lightweight tags are just pointers, they are created instantly and take up virtually no space.",
+      "A lightweight tag is simply a reference that points directly to a commit SHA. It does not store additional metadata such as the tagger’s name, email, date, or a tagging message.",
+
+      "Because they contain no extra information, lightweight tags are fast to create and take up virtually no additional space. They are essentially just named pointers inside the .git/refs/tags directory.",
+
+      "Lightweight tags are typically used for local or temporary milestones. For official releases or versioning, annotated tags are preferred because they include metadata and can be signed.",
+
+      "Tags do not move automatically like branches. Once created, a tag always points to the same commit unless explicitly deleted and recreated.",
     ],
+
     codeBlocks: [
       {
         label: "Create lightweight tag",
         language: "bash",
         code: "git tag v1.0-beta",
-        explanation: "Tags current commit as v1.0-beta",
+        explanation: "Creates a lightweight tag for the current commit",
       },
       {
         label: "Tag specific commit",
         language: "bash",
         code: "git tag quick-fix abc1234",
-        explanation: "Tags a previous commit",
+        explanation: "Creates a tag pointing to a specific commit SHA",
       },
       {
-        label: "Delete tag",
-        language: "bash",
-        code: "git tag -d v1.0-beta",
-        explanation: "Removes the local tag",
-      },
-      {
-        label: "List tags",
+        label: "List all tags",
         language: "bash",
         code: "git tag",
-        explanation: "Lists all tags in repository",
+        explanation: "Displays all tags in the repository",
+      },
+      {
+        label: "Delete local tag",
+        language: "bash",
+        code: "git tag -d v1.0-beta",
+        explanation: "Removes the specified tag locally",
+      },
+      {
+        label: "Push specific tag",
+        language: "bash",
+        code: "git push origin v1.0-beta",
+        explanation: "Pushes a tag to the remote repository",
       },
     ],
+
     keyTakeaways: [
-      "Lightweight tags are just headers pointing to a commit",
-      "No metadata (author, date, message) stored",
-      "Like a branch that doesn't move",
-      "Good for temporary or local-only markers",
+      "Lightweight tags are simple pointers to commits",
+      "They do not store metadata (author, date, message)",
+      "They behave like branches that do not move",
+      "Best for temporary or local markers",
+      "Tags must be pushed explicitly to remote",
     ],
+
     commonMistakes: [
-      "Using lightweight tags for public releases (use annotated instead)",
-      "Thinking tags maintain history like branches (they don't move)",
-      "Forgetting to push tags (they aren't pushed by default)",
+      "Using lightweight tags for official releases instead of annotated tags",
+      "Assuming tags move like branches",
+      "Forgetting that tags are not pushed automatically",
+      "Confusing lightweight tags with annotated tags",
     ],
+
     tips: [
-      "Use lightweight tags for personal bookmarks",
-      "Use annotated tags for releases",
-      "Tags are great for marking 'before-refactor' points",
+      "Use lightweight tags for quick local references",
+      "Use annotated tags for releases and versioning",
+      "Push tags explicitly using git push origin <tag-name>",
+      "Use descriptive naming conventions like v1.0.0-beta",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "annotated-tags",
@@ -3607,117 +3905,187 @@ export const gitContent: ContentSection[] = [
     title: "Annotated Tags",
     description:
       "Create full-featured tags with metadata for official releases and milestones.",
+
     overview:
-      "Annotated tags are stored as full objects in the Git database. They include the tagger's name, email, date, and a tagging message. They can also be GPG signed for verification. This is the recommended tag type for public releases and permanent version markers.",
+      "Annotated tags are stored as full objects in the Git database. They include the tagger's name, email, date, and a tagging message. They can also be GPG signed for verification. Annotated tags are the recommended choice for public releases and permanent version markers.",
+
     detailedExplanation: [
-      "When you create an annotated tag using the -a flag, Git opens an editor for a tag message (or you can use -m). This message is preserved in history, just like a commit message.",
-      "Annotated tags ensure you catch who tagged the release and when, separate from who wrote the code in the commit. This audit trail is crucial for project management.",
-      "You can verify signed tags to ensure the code integrity of a release. This is a security best practice for distributing software.",
+      "When you create an annotated tag using the -a flag, Git creates a separate tag object that contains metadata and a message. You can provide the message inline with -m or allow Git to open your editor.",
+
+      "Annotated tags record who created the tag and when, which is different from the original commit author. This makes them ideal for release tracking and auditing.",
+
+      "You can sign annotated tags using GPG with the -s flag. Signed tags allow others to verify the authenticity and integrity of a release.",
+
+      "Because annotated tags are full objects, they are more suitable for production releases, versioning, and long-term milestones compared to lightweight tags.",
     ],
+
     codeBlocks: [
       {
         label: "Create annotated tag",
         language: "bash",
         code: "git tag -a v1.0.0 -m 'Official Release 1.0.0'",
-        explanation: "Creates tag with message and metadata",
+        explanation: "Creates annotated tag with message and metadata",
+      },
+      {
+        label: "Create signed tag",
+        language: "bash",
+        code: "git tag -s v1.0.0 -m 'Signed release'",
+        explanation: "Creates GPG-signed annotated tag",
       },
       {
         label: "View tag details",
         language: "bash",
         code: "git show v1.0.0",
-        explanation: "Shows tagger info, date, message, and commit",
+        explanation: "Displays tag metadata, message, and referenced commit",
       },
       {
-        label: "Push tags to remote",
+        label: "Push tags",
         language: "bash",
         code: "git push origin v1.0.0\n# or push all tags\ngit push origin --tags",
-        explanation: "Share tags with the team",
-      },
-      {
-        label: "Checkout a tag",
-        language: "bash",
-        code: "git checkout v1.0.0",
-        explanation: "Detached HEAD state at the tag's commit",
+        explanation: "Pushes tags to remote repository",
       },
     ],
+
     keyTakeaways: [
-      "Annotated tags store full metadata (who, when, why)",
-      "Best for public releases and permanent milestones",
-      "Can be signed with GPG for security",
-      "Require a message (like commits)",
-      "Push tags explicitly to remote",
+      "Annotated tags store metadata (who, when, message)",
+      "Recommended for official releases",
+      "Can be GPG signed for security",
+      "Stored as full objects in Git database",
+      "Must be pushed explicitly to remote",
     ],
+
     commonMistakes: [
-      "Forgetting the -a or -m flag (creates lightweight tag)",
-      "Not pushing tags (git push doesn't push tags by default)",
-      "Changing a tag after pushing it (bad practice, confuses fetchers)",
+      "Forgetting -a or -m and accidentally creating lightweight tag",
+      "Not pushing tags to remote",
+      "Rewriting or deleting release tags after publishing",
     ],
+
     tips: [
-      "Always use annotated tags for version releases",
-      "Follow Semantic Versioning (v1.0.0) for tag names",
-      "Write meaningful tag messages describing the release",
+      "Always use annotated tags for production releases",
+      "Follow consistent naming like v1.0.0",
+      "Write meaningful release messages",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "versioning-strategy",
     category: "Tagging",
     title: "Versioning Strategy",
     description:
-      "Implement Semantic Versioning (SemVer) to communicate changes effectively.",
+      "Use Semantic Versioning (SemVer) to communicate the impact of changes clearly.",
+
     overview:
-      "A good versioning strategy, like Semantic Versioning (SemVer), helps users understand the impact of updates. SemVer uses the format MAJOR.MINOR.PATCH (e.g., 2.1.4), communicating breaking changes, new features, and bug fixes clearly.",
+      "A versioning strategy such as Semantic Versioning (SemVer) helps users understand the significance of updates. SemVer uses the format MAJOR.MINOR.PATCH (e.g., 2.1.4) to indicate breaking changes, new features, and bug fixes in a predictable way.",
+
     detailedExplanation: [
-      "MAJOR version (1.0.0 -> 2.0.0): Incompatible API changes. Users may need to change their code to upgrade.",
-      "MINOR version (1.1.0 -> 1.2.0): Backward-compatible new functionality. New features added without breaking existing ones.",
-      "PATCH version (1.1.1 -> 1.1.2): Backward-compatible bug fixes. Safe to upgrade immediately.",
-      "Using tags to implement this strategy gives a clear timeline of your project's evolution. It allows automated tools and dependency managers (like npm, pip) to handle updates safely.",
+      "MAJOR version increments (1.0.0 → 2.0.0) indicate breaking changes that are not backward-compatible.",
+
+      "MINOR version increments (1.1.0 → 1.2.0) indicate backward-compatible new features.",
+
+      "PATCH version increments (1.1.1 → 1.1.2) indicate backward-compatible bug fixes.",
+
+      "Using Git tags to represent these versions creates a clear and traceable history of releases.",
+
+      "Dependency managers and automation tools rely heavily on consistent versioning to determine upgrade safety.",
     ],
+
     codeBlocks: [
       {
-        label: "SemVer Format",
+        label: "Semantic Versioning format",
         language: "text",
-        code: "v<Major>.<Minor>.<Patch>\n\nv1.0.0  -> Initial Release\nv1.0.1  -> Bug fix\nv1.1.0  -> New feature (compatible)\nv2.0.0  -> Breaking change",
-        explanation: "Standard naming convention",
+        code: "v<Major>.<Minor>.<Patch>\n\nv1.0.0  -> Initial Release\nv1.0.1  -> Bug fix\nv1.1.0  -> New feature\nv2.0.0  -> Breaking change",
+        explanation: "Standard SemVer format",
       },
       {
         label: "Search tags by pattern",
         language: "bash",
         code: "git tag -l 'v1.1.*'",
-        explanation: "Find all patches for version 1.1",
+        explanation: "Lists all patch releases for version 1.1",
       },
       {
         label: "Sort tags by version",
         language: "bash",
         code: "git tag --sort=-v:refname",
-        explanation: "List tags treating them as version numbers",
+        explanation: "Sorts tags by version number descending",
       },
     ],
+
     keyTakeaways: [
-      "SemVer: Major.Minor.Patch",
-      "Tags are the mechanism to apply version numbers in Git",
-      "Consistent versioning builds trust with users",
-      "Automated tools rely on standard versioning",
+      "SemVer format is MAJOR.MINOR.PATCH",
+      "Breaking changes require MAJOR version bump",
+      "New backward-compatible features require MINOR bump",
+      "Bug fixes require PATCH bump",
+      "Consistent versioning builds trust and predictability",
     ],
+
     commonMistakes: [
-      "Making breaking changes in Minor or Patch updates",
-      "Inconsistent tag naming (v1.0 vs 1.0 vs ver1)",
-      "Rewriting or moving version tags after release",
+      "Introducing breaking changes in minor or patch versions",
+      "Inconsistent tag naming conventions",
+      "Reusing or modifying version tags after release",
     ],
+
     tips: [
-      "Use 'v' prefix consistently (e.g., v1.0.0)",
-      "Automate tagging in your CI/CD pipeline",
-      "Document changes in a CHANGELOG.md file linked to tags",
+      "Use consistent prefix like v1.0.0",
+      "Automate tagging via CI/CD pipelines",
+      "Maintain a CHANGELOG.md aligned with tags",
     ],
+
+    lastUpdated: "2026-02-14",
   },
   {
     id: "tagging-interview-questions",
     category: "Tagging",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions covering Git tagging, releases, and versioning strategies.",
+
+    overview:
+      "This section contains frequently asked interview questions about Git tagging. It covers lightweight vs annotated tags, release workflows, versioning strategies, and practical usage scenarios in collaborative environments.",
+
+    detailedExplanation: [
+      "Interviewers often test your understanding of the difference between lightweight and annotated tags and when to use each.",
+
+      "You should understand how tags differ from branches and how they are used for marking releases.",
+
+      "Questions may include pushing tags, deleting tags, signing tags, and implementing Semantic Versioning in real-world projects.",
+
+      "Advanced questions may involve release management strategies and tag immutability best practices.",
+    ],
+
+    keyTakeaways: [
+      "Tags mark specific commits permanently",
+      "Annotated tags store metadata and are preferred for releases",
+      "Tags do not move like branches",
+      "Tags must be pushed explicitly",
+      "Versioning strategy is critical for release management",
+    ],
+
+    commonMistakes: [
+      "Confusing tags with branches",
+      "Using lightweight tags for official releases",
+      "Forgetting to push tags to remote",
+      "Rewriting published version tags",
+    ],
+
+    interviewQuestions: [
+      "What is a tag in Git?",
+      "What is the difference between lightweight and annotated tags?",
+      "How do you create an annotated tag?",
+      "How do you push tags to a remote repository?",
+      "Are tags pushed automatically with git push?",
+      "How do you delete a tag locally and remotely?",
+      "What is Semantic Versioning?",
+      "When should you bump major vs minor vs patch?",
+      "Can tags move like branches?",
+      "What is a signed tag and why is it important?",
+      "How do you list tags matching a pattern?",
+      "How do you checkout a tag and what state does it create?",
+      "Why should release tags not be modified after publishing?",
+      "How do dependency managers use version tags?",
+    ],
+
+    lastUpdated: "2026-02-14",
   },
 
   // ===== RESET, REVERT & ROLLBACK =====
@@ -3958,472 +4326,44 @@ export const gitContent: ContentSection[] = [
     id: "reset-revert-rollback-interview-questions",
     category: "Reset, Revert & Rollback",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions covering Git reset, revert, and rollback scenarios.",
+    overview:
+      "This section contains frequently asked interview questions about undoing changes in Git. It covers the differences between reset and revert, when to use each, and how to safe-guard against data loss during rollbacks.",
+    detailedExplanation: [
+      "Interviewers often ask about the three modes of git reset: --soft, --mixed, and --hard. You should know when to use each.",
+      "Understand the key difference: git reset modifies history (dangerous for shared branches), while git revert creates a new commit (safe for shared branches).",
+      "Be prepared to explain how to recover 'lost' commits using git reflog.",
+      "Questions may cover strategies for rolling back production deployments, such as reverting merge commits or checking out specific tags.",
+    ],
+    keyTakeaways: [
+      "Reset modifies history; Revert adds to history",
+      "Reflog is your safety net for accidental resets",
+      "Never use git reset --hard on shared branches",
+      "Always use git revert for undoing pushed changes",
+      "Know the difference between soft, mixed, and hard reset",
+    ],
+    commonMistakes: [
+      "Hard resetting without checking git status",
+      "Force pushing reset changes to shared branches",
+      "Confusing git revert with git restore",
+      "Panicking and deleting local repo instead of using reflog",
+    ],
+    interviewQuestions: [
+      "What is the difference between git reset and git revert?",
+      "Explain the three modes of git reset: soft, mixed, and hard.",
+      "When would you use git reset --soft vs --mixed?",
+      "Why is git reset dangerous on public shared branches?",
+      "How do you recover a commit after a hard reset?",
+      "What command would you use to undo a commit that has already been pushed?",
+      "What does git reflog do?",
+      "How do you revert a merge commit?",
+      "What happens to uncommitted changes when you run git reset --hard?",
+      "How do you rollback a production deployment using Git commands?",
+    ],
+    lastUpdated: "2026-02-14",
   },
 
-  // ===== GITHUB & REMOTE WORKFLOWS =====
-  {
-    id: "creating-repository",
-    category: "GitHub & Remote",
-    title: "Creating a Repository",
-    description: "Initialize a new project and publish it to GitHub.",
-    overview:
-      "Creating a repository is the first step in any Git project. You can start a local repository with `git init` or create one on GitHub and clone it. PUBLISHING a local repository to GitHub links your local work to a remote server, allowing for backup and collaboration.",
-    detailedExplanation: [
-      "To start a new project locally, run `git init`. This creates a hidden `.git` folder that tracks changes. To share this, you create an empty repository on GitHub (without a README, license, or .gitignore to avoid conflicts) and then push your local repo to it.",
-      "Alternatively, you can create a repository on GitHub with initial files (README, .gitignore) and then `git clone` it to your machine. This is often easier for beginners as it sets up the remote connection automatically.",
-      "Connecting a local repo to GitHub involves adding a remote: `git remote add origin <url>`. 'origin' is just the standard name for the main remote server.",
-      "The first push requires setting the upstream branch: `git push -u origin main`. This links your local 'main' branch to the remote 'main' branch, so future pushes can just be `git push`.",
-    ],
-    codeBlocks: [
-      {
-        label: "Option 1: Push existing local repo",
-        language: "bash",
-        code: "git remote add origin https://github.com/user/repo.git\ngit branch -M main\ngit push -u origin main",
-        explanation: "Connects local repo to GitHub and pushes code",
-      },
-      {
-        label: "Option 2: Clone new repo",
-        language: "bash",
-        code: "git clone https://github.com/user/repo.git\ncd repo",
-        explanation: "Downloads remote repo (already connected)",
-      },
-      {
-        label: "Verify remote connection",
-        language: "bash",
-        code: "git remote -v",
-        explanation: "Lists linked remote repositories (fetch/push URLs)",
-      },
-    ],
-    keyTakeaways: [
-      "Two ways to start: init locally then push, OR create remotely then clone",
-      "origin is the default alias for the remote repository URL",
-      "-u flag links local branch to remote branch (upstream)",
-      "Always rename master to main for modern defaults (git branch -M main)",
-    ],
-    commonMistakes: [
-      "Initializing a repo inside another repo (nested .git folders)",
-      "Creating a repo on GitHub with a README and trying to push an existing local repo (causes fatal: refusing to merge unrelated histories)",
-      "Forgetting to add the remote before trying to push",
-    ],
-    tips: [
-      "Use `git clone` for the easiest start",
-      "Use GitHub CLI (`gh repo create`) to do everything from terminal",
-      "Check `git remote -v` if push fails to ensure correct URL",
-    ],
-  },
-  {
-    id: "forking",
-    category: "GitHub & Remote",
-    title: "Forking",
-    description:
-      "Create a personal copy of someone else's repository to contribute changes.",
-    overview:
-      "Forking is a GitHub feature (not a Git command) that allows you to create a personal copy of another user's repository. It bridges the gap between reading code and contributing to it. You clone your fork, make changes, and then propose them back to the original project via a Pull Request.",
-    detailedExplanation: [
-      "When you fork a repo, you get a full copy under your GitHub account. You have full write access to this copy, unlike the original repo which you might only have read access to.",
-      "The standard open-source workflow: Fork the repo -> Clone your fork -> Create a branch -> Make changes -> Push to YOUR fork -> Open Pull Request to original repo.",
-      "A fork is not automatically synced with the original repository. You must manually fetch updates from the original (often called 'upstream') to keep your fork up to date.",
-    ],
-    codeBlocks: [
-      {
-        label: "Clone your fork",
-        language: "bash",
-        code: "git clone https://github.com/YOUR-USERNAME/repo.git",
-        explanation: "Downloads your personal copy of the project",
-      },
-      {
-        label: "See remotes",
-        language: "bash",
-        code: "git remote -v\n# origin  https://github.com/YOUR-USERNAME/repo.git (fetch)\n# origin  https://github.com/YOUR-USERNAME/repo.git (push)",
-        explanation: "Shows only your fork initially",
-      },
-    ],
-    keyTakeaways: [
-      "Forking makes a server-side copy on GitHub",
-      "Allows you to modify ANY open-source project freely",
-      "First step in the 'Fork & Pull' workflow",
-      "You need to manually sync your fork with original repo",
-    ],
-    commonMistakes: [
-      "Cloning the original repo instead of your fork (you won't be able to push!)",
-      "Forgetting to keep the fork updated (diverging too far)",
-      "Thinking forking affects the original repository (it doesn't)",
-    ],
-    tips: [
-      "Always clone YOUR fork, not the original",
-      "Use descriptive branch names even on forks",
-      "GitHub now provides a 'Sync Fork' button in the UI for ease",
-    ],
-  },
-  {
-    id: "syncing-fork",
-    category: "GitHub & Remote",
-    title: "Syncing a Fork",
-    description: "Keep your fork up-to-date with the original repository.",
-    overview:
-      "Since a fork is a static copy, it doesn't automatically receive updates from the original repository (upstream). Syncing ensures your code is based on the latest version, minimizing conflicts when you eventually submit a Pull Request.",
-    detailedExplanation: [
-      "To sync locally, you typically add a second remote called 'upstream' pointing to the original repository. You then fetch from upstream and merge (or rebase) it into your local main branch.",
-      "The workflow: `git fetch upstream` (downloads updates) -> `git checkout main` -> `git merge upstream/main` (integrates updates). Then you `git push origin main` to update your fork on GitHub.",
-      "Keeping your fork synced prevents 'merge hell' where your feature branch is months behind the main project.",
-    ],
-    codeBlocks: [
-      {
-        label: "Add upstream remote",
-        language: "bash",
-        code: "git remote add upstream https://github.com/ORIGINAL-OWNER/repo.git",
-        explanation: "Links to the original repository",
-      },
-      {
-        label: "Sync main branch",
-        language: "bash",
-        code: "git fetch upstream\ngit checkout main\ngit merge upstream/main",
-        explanation: "Updates local main with original repo's changes",
-      },
-      {
-        label: "Push updates to your fork",
-        language: "bash",
-        code: "git push origin main",
-        explanation: "Updates your GitHub fork properties",
-      },
-      {
-        label: "One-liner sync (if on main)",
-        language: "bash",
-        code: "git pull upstream main",
-        explanation: "Fetch and merge in one step",
-      },
-    ],
-    keyTakeaways: [
-      "upstream = original repo, origin = your fork",
-      "Sync regularly to avoid massive conflicts",
-      "Never commit directly to main in a fork (keep it clean for syncing)",
-      "Feature branches should be rebased onto updated main",
-    ],
-    commonMistakes: [
-      "Forgetting to add the upstream remote",
-      "Merging upstream changes into a feature branch instead of main",
-      "Never syncing and sending a PR with 1000+ conflict lines",
-    ],
-    tips: [
-      "Check `git remote -v` to confirm upstream is set",
-      "Use GitHub's 'Sync Fork' button if you don't want to use CLI",
-      "Always sync before starting a new feature branch",
-    ],
-  },
-  {
-    id: "remote-url-management",
-    category: "GitHub & Remote",
-    title: "Remote URL Management",
-    description: "View, change, and manage remote repository connections.",
-    overview:
-      "Git remotes are just aliases for URLs. You might need to change a remote URL if you switch from HTTPS to SSH, move a repository to a new organization, or rename a repository. Managing these URLs correctly is key to connectivity.",
-    detailedExplanation: [
-      "The `git remote` command manages the set of tracked repositories. `origin` is the default, but you can have many. For example, a deployment remote (heroku) or a colleague's fork (jane).",
-      "Changing a URL is common when switching authentication methods (HTTPS vs SSH). SSH is generally preferred for security and convenience (no typing passwords).",
-      "`git remote set-url origin <new-url>` updates an existing remote. `git remote rename` and `git remote remove` help organize your connections.",
-    ],
-    codeBlocks: [
-      {
-        label: "View remote URLs",
-        language: "bash",
-        code: "git remote -v",
-        explanation: "Shows fetch and push URLs for each remote",
-      },
-      {
-        label: "Change remote URL",
-        language: "bash",
-        code: "git remote set-url origin git@github.com:user/repo.git",
-        explanation: "Updates 'origin' to use SSH URL",
-      },
-      {
-        label: "Rename a remote",
-        language: "bash",
-        code: "git remote rename origin old-origin",
-        explanation: "Changes alias from 'origin' to 'old-origin'",
-      },
-      {
-        label: "Remove a remote",
-        language: "bash",
-        code: "git remote remove upstream",
-        explanation: "Deletes the connection to 'upstream'",
-      },
-    ],
-    keyTakeaways: [
-      "Remotes are just named bookmarks for URLs",
-      "You can change URLs without losing history",
-      "HTTPS URLs require credential helper or tokens",
-      "SSH URLs require SSH keys set up with GitHub",
-    ],
-    commonMistakes: [
-      "Typing the wrong URL and getting 'Repository not found'",
-      "Trying to push to a read-only HTTP URL",
-      "Confusing `remote set-url` with `remote add`",
-    ],
-    tips: [
-      "Use SSH (git@github.com...) for easier pushing without passwords",
-      "Run `git remote -v` whenever connection fails",
-      "Clean up old remotes from deleted forks",
-    ],
-  },
-  {
-    id: "upstream-remote",
-    category: "GitHub & Remote",
-    title: "Upstream Remote",
-    description:
-      "Understand the concept of upstream vs origin in forking workflows.",
-    overview:
-      "In a Fork & Pull workflow, you interact with two remotes: 'origin' (your fork) and 'upstream' (the original project). Understanding the flow of data between these three points (local, origin, upstream) is crucial for contributing to open source.",
-    detailedExplanation: [
-      "Data Flow: Upstream -> Local -> Origin -> Upstream (via PR).",
-      "1. You PULL from Upstream to get latest community changes.",
-      "2. You PUSH to Origin to back up your work and prepare for PR.",
-      "3. You never push to Upstream (usually forbidden).",
-      "4. You open a Pull Request from Origin to Upstream on GitHub website.",
-    ],
-    codeBlocks: [
-      {
-        label: "Standard Fork Setup",
-        language: "bash",
-        code: "git remote add origin <your-fork-url>\ngit remote add upstream <original-repo-url>",
-        explanation: "The standard two-remote configuration",
-      },
-      {
-        label: "Verify setup",
-        language: "bash",
-        code: "git remote -v",
-        explanation:
-          "Should show 4 lines: origin (fetch/push) and upstream (fetch/push)",
-      },
-    ],
-    keyTakeaways: [
-      "Origin = Your Copy (Read/Write)",
-      "Upstream = Original Project (Read Only usually)",
-      "Pull from Upstream, Push to Origin",
-      "Don't confuse the two or you'll get permission errors",
-    ],
-    commonMistakes: [
-      "Trying to push to upstream without permission",
-      "Pulling from origin instead of upstream to update main",
-      "Naming the upstream remote something random like 'source'",
-    ],
-    tips: [
-      "Configuration is per-local-repository",
-      "You can have remotes for teammates too (e.g., 'git remote add susan ...')",
-      "Use 'git fetch --all' to update all remotes at once",
-    ],
-  },
-  {
-    id: "pull-request",
-    category: "GitHub & Remote",
-    title: "Pull Request (PR)",
-    description: "Propose changes to a repository and initiate code review.",
-    overview:
-      "A Pull Request (PR) is a platform feature (GitHub/GitLab) that lets you tell others about changes you've pushed to a branch. It's a dedicated forum for discussing the proposed changes, reviewing code, and ensuring quality before merging into the main codebase.",
-    detailedExplanation: [
-      "A PR compares your feature branch with the target branch (usually 'main'). It shows the diff, commits, and allows for line-by-line comments.",
-      "PRs are the heart of collaboration. They run CI/CD tests automatically, require approvals from team members, and prevent broken code from reaching production.",
-      "You don't need to close a PR to update it. Just push new commits to the same branch, and the PR updates automatically. This is key for addressing feedback.",
-    ],
-    codeBlocks: [
-      {
-        label: "Workflow",
-        language: "text",
-        code: "1. Create Branch -> 2. Commit Changes -> 3. Push to Origin\n4. Open PR on GitHub -> 5. Review & Discuss -> 6. Merge",
-        explanation: "The lifecycle of a code change",
-      },
-      {
-        label: "Update an existing PR",
-        language: "bash",
-        code: "git add .\ngit commit -m 'Address review comments'\ngit push origin feature-branch",
-        explanation: "Just push to the same branch to update the PR",
-      },
-    ],
-    keyTakeaways: [
-      "PRs are for discussion and review BEFORE merging",
-      "Pushing to the branch updates the PR automatically",
-      "PRs can trigger automated tests (CI)",
-      "You can draft a PR to show work-in-progress",
-    ],
-    commonMistakes: [
-      "Closing a PR and opening a new one just to update code",
-      "Merging your own PR without review (unless allowed)",
-      "Including unrelated changes in a single PR (keep it focused)",
-    ],
-    tips: [
-      "Write a clear PR description with screenshots/videos",
-      "Link issues using 'Fixes #123' in the description",
-      "Review your own code/diff before creating the PR",
-    ],
-  },
-  {
-    id: "code-review",
-    category: "GitHub & Remote",
-    title: "Code Review",
-    description:
-      "Best practices for reviewing code and responding to feedback.",
-    overview:
-      "Code review is a quality assurance process where developers examine each other's code. It's not just about finding bugs; it's about knowledge sharing, maintaining consistency, and improving design.",
-    detailedExplanation: [
-      "As a Reviewer: Be kind and constructive. commenting 'This is bad' is unhelpful. Explain WHY and suggest alternatives. Focus on logic, security, and readability, not just style (use linters for that).",
-      "As an Author: Don't take feedback personally. The goal is better code, not criticizing you. If you disagree, explain your reasoning politely.",
-      "GitHub allows 'Suggestions', where reviewers can write code snippets that authors can commit directly from the UI.",
-    ],
-    codeBlocks: [
-      {
-        label: "Review Checklist",
-        language: "text",
-        code: "- Does it solve the problem?\n- Is it readable and maintainable?\n- Are there tests?\n- Does it follow security best practices?\n- Is documentation updated?",
-        explanation: "What to look for",
-      },
-    ],
-    keyTakeaways: [
-      "Code review improves quality and team knowledge",
-      "Be constructive and specific",
-      "Automate style checks to focus review on logic",
-      "Small PRs are easier to review than massive ones",
-    ],
-    commonMistakes: [
-      "Rubber-stamping (approving without reading)",
-      "Nitpicking styling issues that tools should catch",
-      "Being defensive about feedback",
-      "Reviewing too much code at once (fatigue)",
-    ],
-    tips: [
-      "Review code locally if it's complex",
-      "Use 'Draft PR' status until ready for review",
-      "Batch your comments instead of sending one by one",
-    ],
-  },
-  {
-    id: "squash-merge",
-    category: "GitHub & Remote",
-    title: "Squash & Merge",
-    description: "Combine all PR commits into a single commit upon merging.",
-    overview:
-      "Squash & Merge is a GitHub option that takes all the commits from a Pull Request and combines them into one single commit on the target branch. This creates a very clean, linear history on the main branch, hiding the messy 'work in progress' commits.",
-    detailedExplanation: [
-      "Instead of seeing 'Typo', 'WIP', 'Fix bug', 'Fix bug again' in the main history, you just see one commit: 'Add Feature X (#123)'.",
-      "This is excellent for the main branch history but destroys the individual commit history of the feature branch. Use this when the individual steps aren't important, just the final result.",
-      "It makes 'git revert' easier because the entire feature is one commit.",
-    ],
-    codeBlocks: [
-      {
-        label: "Visual Comparison",
-        language: "text",
-        code: "Normal Merge:  o---o---o---M  (All commits preserved)\nSquash Merge:  o------------S  (One single commit)",
-        explanation: "Squash compresses history",
-      },
-    ],
-    keyTakeaways: [
-      "Keeps main branch history clean and linear",
-      "Combines messy WIP commits into one",
-      "Perfect for features that don't need granular history",
-      "Changes the Author to the person clicking merge (usually)",
-    ],
-    commonMistakes: [
-      "Squashing when individual commit history IS important",
-      "writing a vague commit message for the squashed commit",
-      "Confusing squash merge (GitHub) with git merge --squash (Local)",
-    ],
-    tips: [
-      "Most open source projects prefer Squash & Merge",
-      "Ensure the final commit message is descriptive",
-      "Use it for small to medium features",
-    ],
-  },
-  {
-    id: "rebase-merge",
-    category: "GitHub & Remote",
-    title: "Rebase & Merge",
-    description:
-      "Replay PR commits onto the target branch for a linear history.",
-    overview:
-      "Rebase & Merge replays the commits from the PR one by one onto the base branch. Unlike a regular merge, it doesn't create a merge commit. Unlike squash, it preserves individual commits. It forces a linear history.",
-    detailedExplanation: [
-      "This is like running `git rebase main` locally and then doing a fast-forward merge.",
-      "It's great if you want to keep the commit history but avoid the 'diamond shape' of merge bubbles in the graph.",
-      "However, if the commits are messy ('fix', 'fix again'), they will all pollute the main history. It works best when the PR author has already cleaned up their commits.",
-    ],
-    codeBlocks: [
-      {
-        label: "Visual Comparison",
-        language: "text",
-        code: "Normal Merge:  o---o-M\nRebase Merge:  o---o---o  (Linear, no merge commit)",
-        explanation: "Commits are reapplied on top of main",
-      },
-    ],
-    keyTakeaways: [
-      "Creates a linear history without merge commits",
-      "Preserves individual commits (unlike squash)",
-      "Requires clean commit history from the author",
-      "Can't easily revert the whole feature (must revert multiple commits)",
-    ],
-    commonMistakes: [
-      "Using this with messy PRs (pollutes history)",
-      " expecting a merge commit to mark the integration point",
-      "Not testing that the reordered commits still work individually",
-    ],
-    tips: [
-      "Enforce 'Linear history' in GitHub branch protection",
-      "Ask contributors to squash their own commits before merging",
-      "Use for projects that demand a strictly linear timeline",
-    ],
-  },
-  {
-    id: "cherry-pick",
-    category: "GitHub & Remote",
-    title: "Cherry Pick",
-    description:
-      "Select specific commits from one branch and apply them to another.",
-    overview:
-      "Cherry-picking allows you to pick a single commit (or a few) from a different branch and apply it to your current branch. This is useful for apply hotfixes to multiple branches (e.g., v1.0 and v2.0) or retrieving a specific change without merging the whole branch.",
-    detailedExplanation: [
-      "Command: `git cherry-pick <commit-sha>`",
-      "This copies the changes from that commit and creates a NEW commit with a new SHA on your current branch. It introduces the same change but is technically a different commit object.",
-      "Useful for 'Backporting': fixing a bug in 'main' and cherry-picking that fix into a 'release-v1' branch.",
-    ],
-    codeBlocks: [
-      {
-        label: "Cherry pick a single commit",
-        language: "bash",
-        code: "git cherry-pick abc1234",
-        explanation: "Applies commit abc1234 to current branch",
-      },
-      {
-        label: "Cherry pick multiple commits",
-        language: "bash",
-        code: "git cherry-pick abc1234 def5678",
-        explanation: "Applies multiple commits in order",
-      },
-      {
-        label: "Resolve conflicts",
-        language: "bash",
-        code: "git cherry-pick --continue\n# or\ngit cherry-pick --abort",
-        explanation: "Standard conflict resolution workflow",
-      },
-    ],
-    keyTakeaways: [
-      "Selective merging of specific commits",
-      "Creates new commits (duplicate capability, different SHA)",
-      "Great for hotfixes and backporting",
-      "Can cause duplicate commit noise if branches are later merged",
-    ],
-    commonMistakes: [
-      "Cherry-picking commits that are eventually going to be merged anyway",
-      "Cherry-picking a commit but forgetting its dependencies",
-      "Confusing cherry-pick with merge",
-    ],
-    tips: [
-      "Use -x flag (`git cherry-pick -x`) to append 'cherry picked from commit...' to message",
-      "Don't cherry-pick if you can merge",
-      "Great for undoing a mistake: cherry-pick the reverting commit",
-    ],
-  },
   // ===== REFLOG & RECOVERY =====
   {
     id: "git-reflog",
@@ -4553,429 +4493,40 @@ export const gitContent: ContentSection[] = [
     id: "reflog-recovery-interview-questions",
     category: "Reflog & Recovery",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
-  },
-
-  // ===== WORKFLOWS & BEST PRACTICES =====
-  {
-    id: "feature-branch-workflow",
-    category: "Workflows & Best Practices",
-    title: "Feature Branch Workflow",
     description:
-      "The standard workflow: create a branch for every new feature or fix.",
+      "Common interview questions regarding data recovery, reflog usage, and handling lost commits.",
     overview:
-      "The Feature Branch Workflow allows developers to work on new features in dedicated branches instead of the main code base. This ensures the main branch always contains production-quality code and allows multiple developers to work in parallel without blocking each other.",
+      "This section covers essential questions about Git's safety mechanisms. Expect questions on how to recover deleted branches, find lost commits using reflog, and the difference between reflog and the standard commit log.",
     detailedExplanation: [
-      "1. Pull latest main: Start with a fresh codebase.",
-      "2. Create branch: `git checkout -b feature/my-feature`.",
-      "3. Work & Commit: precise, logical commits.",
-      "4. Push: `git push -u origin feature/my-feature`.",
-      "5. Open Pull Request: Review and discuss.",
-      "6. Merge: Integrate into main and delete the feature branch.",
-    ],
-    codeBlocks: [
-      {
-        label: "Start feature",
-        language: "bash",
-        code: "git checkout main\ngit pull\ngit checkout -b feature/new-login-screen",
-        explanation: "Always start from updated main",
-      },
-      {
-        label: "Finish feature",
-        language: "bash",
-        code: "git push origin feature/new-login-screen\n# Go to GitHub to open PR",
-        explanation: "Push execution to remote",
-      },
+      "Be ready to explain that `git reflog` tracks local repository movements and is not shared with remotes.",
+      "Understand that 'deleted' commits are not immediately removed from the database but become 'dangling' until garbage collected.",
+      "You may be asked how to recover a branch that was deleted, which involves finding the tip SHA in the reflog and ensuring you recreate the branch pointer.",
+      "Advanced questions might touch on `git fsck` or the expiration period of reflog entries (default 90 days for reachable, 30 for unreachable).",
     ],
     keyTakeaways: [
-      "Isolates work in progress from stable code",
-      "Enables code review via Pull Requests",
-      "Standard for most professional teams",
+      "Reflog is specific to your local repository",
+      "It records every time HEAD updates",
+      "Deleted branches/commits are recoverable via reflog",
+      "Data is only truly lost after garbage collection (git gc)",
     ],
     commonMistakes: [
-      "Working directly on main",
-      "Forgetting to pull main before creating feature branch",
-      "Long-lived feature branches that become hard to merge",
+      "Assuming reflog history is pushed to the server",
+      "Waiting too long to recover lost data (garbage collection)",
+      "confusing `git log` (project history) with `git reflog` (you movement history)",
     ],
-    tips: [
-      "Keep feature branches short-lived (days, not months)",
-      "Sync with main regularly if the feature takes time",
+    interviewQuestions: [
+      "What is `git reflog` and how does it differ from `git log`?",
+      "How do you recover a branch that you accidentally deleted?",
+      "If you perform a hard reset and lose a commit, how can you get it back?",
+      "Is the reflog pushed to the remote repository?",
+      "How long does Git keep reflog entries by default?",
+      "What is a 'dangling commit'?",
+      "How can you restore a specific state from the reflog?",
+      "What command helps you find dangling objects if reflog doesn't show them?",
+      "Does `git commit --amend` destroy the previous commit forever?",
+      "Why might a commit not appear in the reflog?",
     ],
-  },
-  {
-    id: "git-flow",
-    category: "Workflows & Best Practices",
-    title: "Git Flow",
-    description:
-      "A strict branching model designed for scheduled project releases.",
-    overview:
-      "Git Flow is a robust framework for managing large projects. It assigns specific roles to branches: `main` (production), `develop` (integration), `feature/*` (new work), `release/*` (prep for production), and `hotfix/*` (urgent fixes).",
-    detailedExplanation: [
-      "Development happens on `develop`.",
-      "Features branch off `develop` and merge back to `develop`.",
-      "When ready to release, a `release` branch is created off `develop`.",
-      "Once tested, `release` merges into `main` (with a tag) AND `develop`.",
-      "Hotfixes branch off `main` and merge into both `main` and `develop`.",
-    ],
-    codeBlocks: [
-      {
-        label: "Initialize Git Flow",
-        language: "bash",
-        code: "git flow init",
-        explanation:
-          "Sets up the branch structure (requires git-flow extension)",
-      },
-    ],
-    keyTakeaways: [
-      "Strict structure good for versioned software products",
-      "Keeps development separate from shipping code",
-      "Can be complex for simple web apps (overkill)",
-    ],
-    commonMistakes: [
-      "Using Git Flow for simple CD (Continuous Deployment) projects",
-      "Forgetting to back-merge hotfixes to develop",
-    ],
-    tips: [
-      "Consider 'GitHub Flow' or 'Trunk Based' if Git Flow feels too heavy",
-      "Use CLI tools like git-flow-avh to automate the branching",
-    ],
-  },
-  {
-    id: "trunk-based-development",
-    category: "Workflows & Best Practices",
-    title: "Trunk Based Development",
-    description:
-      "A modern, high-speed workflow where everyone commits to main frequently.",
-    overview:
-      "In Trunk Based Development, developers merge small, frequent updates to the main branch ('trunk') multiple times a day. It avoids 'merge hell' by keeping branches extremely short-lived. It relies heavily on automated testing and Feature Flags to keep the main branch shippable.",
-    detailedExplanation: [
-      "Instead of long feature branches, you commit small chunks.",
-      "If a feature isn't ready, you hide it behind a Feature Flag so it doesn't affect users.",
-      "This enables Continuous Integration (CI) and Continuous Deployment (CD).",
-    ],
-    codeBlocks: [
-      {
-        label: "Workflow",
-        language: "text",
-        code: "Code -> Test -> Commit to Main -> Auto-Deploy",
-        explanation: "Fast feedback loop",
-      },
-    ],
-    keyTakeaways: [
-      "Requires strong automated tests",
-      "Eliminates long merge conflicts",
-      "The 'modern' way for SaaS and web apps",
-      "You typically fix forward instead of rolling back",
-    ],
-    commonMistakes: [
-      "Pushing broken code to trunk (breaks it for everyone)",
-      "Not using Feature Flags for incomplete work",
-    ],
-    tips: [
-      "Pair programming helps ensure quality without slow PR reviews",
-      "Run tests locally before every push",
-    ],
-  },
-  {
-    id: "commit-message-convention",
-    category: "Workflows & Best Practices",
-    title: "Commit Message Convention",
-    description:
-      "Write clear, structured commit messages (Conventional Commits).",
-    overview:
-      "Standardizing commit messages makes history readable and allows for automated changelog generation. The 'Conventional Commits' specification is the most popular standard.",
-    detailedExplanation: [
-      "Format: `<type>(<scope>): <subject>`",
-      "Types: `feat` (new feature), `fix` (bug fix), `docs` (documentation), `style` (formatting), `refactor` (code change no feature/fix), `test` (tests), `chore` (build tasks).",
-      "Example: `feat(auth): add google login support`",
-    ],
-    codeBlocks: [
-      {
-        label: "Good Commit Message",
-        language: "text",
-        code: "feat(ui): add dark mode switch\n\n- Added toggle in navbar\n- Persists preference to localStorage\n- Updated Tailwind config for dark mode",
-        explanation: "Clear type, scope, summary, and details",
-      },
-    ],
-    keyTakeaways: [
-      "Follows a standard format",
-      "Makes `git log` readable",
-      "Enables automated versioning (Semantic Release)",
-    ],
-    commonMistakes: [
-      "Vague messages: 'fix', 'update', 'wip'",
-      "Mixing multiple changes in one commit",
-    ],
-    tips: [
-      "Use `commitlint` to enforce style in CI",
-      "Think: 'If applied, this commit will... <subject>'",
-    ],
-  },
-  {
-    id: "branch-naming-convention",
-    category: "Workflows & Best Practices",
-    title: "Branch Naming Convention",
-    description: "Naming strategies to keep your repository organized.",
-    overview:
-      "Consistent branch names tell you exactly what a branch is for and who owns it. Common prefixes help categorize work.",
-    detailedExplanation: [
-      "Structure: `category/reference/description`",
-      "Categories: `feature/`, `bugfix/`, `hotfix/`, `release/`, `test/`.",
-      "Examples: `feature/user-profile`, `bugfix/login-error-404`, `hotfix/prod-crash`.",
-    ],
-    codeBlocks: [
-      {
-        label: "Examples",
-        language: "bash",
-        code: "git branch feature/shopping-cart\ngit branch bugfix/header-alignment\ngit branch users/nikhil/experiment-1",
-        explanation: "Clear hierarchy and purpose",
-      },
-    ],
-    keyTakeaways: [
-      "Use slashes `/` to group branches (folders in some GUI tools)",
-      "Keep it lowercase and kebab-case",
-      "Include issue ID if using Jira/Linear (e.g., `feature/JIRA-123-login`)",
-    ],
-    commonMistakes: [
-      "Random names: 'nikhil-test', 'final-final-v2'",
-      "Using spaces or special characters",
-    ],
-    tips: [
-      "Configure your ticketing system to copy-paste branch names",
-      "Stick to one convention as a team",
-    ],
-  },
-  // ===== DEBUGGING & MAINTENANCE =====
-  {
-    id: "git-bisect",
-    category: "Debugging & Maintenance",
-    title: "git bisect",
-    description: "Use binary search to find the commit that introduced a bug.",
-    overview:
-      "Git bisect is a debugging tool that helps you find which specific commit introduced a bug. You tell it a 'good' commit (where it worked) and a 'bad' commit (where it's broken), and it automatically checks out the middle commit for you to test, repeating until it pinpoints the culprit.",
-    detailedExplanation: [
-      "This turns a search through 100 commits into ~7 steps (2^7 = 128).",
-      "Process: `git bisect start` -> `git bisect bad` (current) -> `git bisect good <sha>` (old working version).",
-      "Git checks out a commit. You test. If broken, run `git bisect bad`. If working, run `git bisect good`. Repeat.",
-    ],
-    codeBlocks: [
-      {
-        label: "Start bisecting",
-        language: "bash",
-        code: "git bisect start\ngit bisect bad HEAD\ngit bisect good v1.0.0",
-        explanation: "Begin the definition of the search range",
-      },
-      {
-        label: "Mark current commit",
-        language: "bash",
-        code: "git bisect good\n# or\ngit bisect bad",
-        explanation: "Tell Git the status of the current checked-out commit",
-      },
-      {
-        label: "Finish",
-        language: "bash",
-        code: "git bisect reset",
-        explanation: "Return to original branch when done",
-      },
-    ],
-    keyTakeaways: [
-      "Fastest way to find a regression in history",
-      "Can be automated with `git bisect run <script>`",
-      "Requires code to be buildable/testable at each step",
-    ],
-    commonMistakes: [
-      "Forgetting to `git bisect reset` at the end",
-      "Testing the wrong thing (false positives)",
-    ],
-    tips: [
-      "Write a script that returns 0 (good) or 1 (bad) to fully automate it",
-      "Use `git bisect skip` if a commit is untestable (build broken)",
-    ],
-  },
-  {
-    id: "git-blame",
-    category: "Debugging & Maintenance",
-    title: "git blame",
-    description: "See who wrote each line of a file and in which commit.",
-    overview:
-      "Git blame annotates each line of a file with the revision, author, and time. It's useful for understanding the context of why a line was written, not just primarily for 'blaming' someone.",
-    detailedExplanation: [
-      "Shows the commit SHA, author, and timestamp for every line.",
-      "Great for finding out: 'Why was this condition added?' -> Find commit -> Read commit message/PR.",
-    ],
-    codeBlocks: [
-      {
-        label: "Blame a file",
-        language: "bash",
-        code: "git blame index.js",
-        explanation: "Show annotations for whole file",
-      },
-      {
-        label: "Blame specific lines",
-        language: "bash",
-        code: "git blame -L 10,20 index.js",
-        explanation: "Show lines 10 through 20 only",
-      },
-    ],
-    keyTakeaways: [
-      "Used to find CONTEXT, not just culprits",
-      "Shows the last person to touch the line",
-      "Use with GUI (VS Code GitLens) for best experience",
-    ],
-    commonMistakes: [
-      "Blaming code that was just moved (use `-w` to ignore whitespace)",
-      "Judging code without reading the commit message",
-    ],
-    tips: [
-      "Use `git log -S <string>` to search for when code was added/removed if blame is confusing",
-      "In GitHub UI, click 'Blame' button on any file",
-    ],
-  },
-  {
-    id: "workflows-best-practices-interview-questions",
-    category: "Workflows & Best Practices",
-    title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
-  },
-
-  // ===== GITHUB FUNDAMENTALS =====
-  {
-    id: "what-is-github",
-    category: "GitHub Fundamentals",
-    title: "What is GitHub",
-    description:
-      "Learn about GitHub, the world's leading platform for hosting Git repositories and collaborating on code.",
-    overview:
-      "GitHub is a cloud-based hosting service for Git repositories. It provides a web interface for Git's version control functionality plus several collaboration features like pull requests, issues, project boards, and code review tools. GitHub has become the de facto standard for open source development and team collaboration.",
-    detailedExplanation: [
-      "GitHub is not Git - it's a platform built on top of Git. While Git is the version control system that tracks changes to your code locally, GitHub is a hosting service that stores your repositories online and adds collaboration features. You can use Git without GitHub, but GitHub requires Git.",
-      "GitHub provides a graphical interface for many Git operations, making Git more accessible to those who prefer not to use the command line. However, understanding Git fundamentals is still essential because GitHub's features are built on Git concepts.",
-      "Beyond basic repository hosting, GitHub offers pull requests (propose and review changes), issues (track bugs and features), actions (CI/CD automation), projects (project management), discussions, wikis, and GitHub Pages for hosting websites directly from repositories.",
-      "GitHub revolutionized open source development by making it easy to fork projects, contribute changes via pull requests, and collaborate with developers worldwide. The social coding aspect - following developers, starring repositories, contributing to projects - created a vibrant ecosystem.",
-    ],
-    codeBlocks: [
-      {
-        label: "Clone from GitHub",
-        language: "bash",
-        code: "git clone https://github.com/username/repository.git",
-        explanation: "Download a repository from GitHub to your local machine",
-      },
-      {
-        label: "Push to GitHub",
-        language: "bash",
-        code: "git push origin main",
-        explanation: "Upload your local commits to GitHub",
-      },
-      {
-        label: "Pull from GitHub",
-        language: "bash",
-        code: "git pull origin main",
-        explanation: "Download and merge changes from GitHub",
-      },
-    ],
-    keyTakeaways: [
-      "GitHub is a hosting platform for Git repositories, not Git itself",
-      "Adds collaboration features: pull requests, issues, code review",
-      "Industry standard for open source and team collaboration",
-      "Provides web interface for Git operations",
-      "Offers CI/CD, project management, and hosting features",
-    ],
-    commonMistakes: [
-      "Confusing Git with GitHub - they're different things",
-      "Thinking you need GitHub to use Git (you don't)",
-      "Not understanding that GitHub just hosts your Git repos",
-      "Expecting Git commands to work on GitHub's web interface",
-    ],
-    tips: [
-      "Learn Git fundamentals before focusing on GitHub features",
-      "Explore GitHub's features beyond just hosting: Actions, Projects, Issues",
-      "Use GitHub for portfolio - recruiters look at GitHub profiles",
-    ],
-  },
-  {
-    id: "git-vs-github",
-    category: "GitHub Fundamentals",
-    title: "Git vs GitHub",
-    description:
-      "Understand the crucial difference between Git (the version control system) and GitHub (the hosting platform).",
-    overview:
-      "Git and GitHub are often confused, but they serve different purposes. Git is the distributed version control system that runs locally on your computer and tracks changes to your code. GitHub is a cloud-based hosting service that stores Git repositories online and adds collaboration features. You can use Git without GitHub, but you can't use GitHub without Git.",
-    detailedExplanation: [
-      "Git is software you install on your computer created by Linus Torvalds in 2005. It works entirely offline, tracking your changes, creating commits, managing branches, all locally. You don't need an internet connection or any external service to use Git - it's a standalone tool.",
-      "GitHub is a company and web-based platform launched in 2008 that hosts Git repositories. It's one of several Git hosting services (others include GitLab, Bitbucket, Gitea). GitHub adds a web interface, collaboration tools like pull requests and code review, and social features like following developers and starring projects.",
-      "The relationship: Git is the foundation, GitHub is built on top of it. When you push to GitHub, you're using Git to send your local commits to GitHub's servers. When you create a pull request on GitHub, you're using GitHub's interface to propose merging Git branches.",
-      "Alternatives to GitHub exist because Git is open source and standardized. If you learn Git, you can work with any Git hosting service. The Git commands remain the same whether you're using GitHub, GitLab, Bitbucket, or self-hosted solutions.",
-    ],
-    codeBlocks: [
-      {
-        label: "Git (local operations)",
-        language: "bash",
-        code: "git init\ngit add .\ngit commit -m 'Local commit'\ngit branch feature\ngit merge feature",
-        explanation: "Git works entirely on your local machine",
-      },
-      {
-        label: "GitHub (remote operations)",
-        language: "bash",
-        code: "git remote add origin https://github.com/user/repo.git\ngit push origin main\ngit pull origin main",
-        explanation: "GitHub commands involve remote repository",
-      },
-    ],
-    keyTakeaways: [
-      "Git = version control system (software on your computer)",
-      "GitHub = hosting service for Git repositories (website/platform)",
-      "Git works offline, GitHub requires internet",
-      "GitHub is one of many Git hosting services",
-      "You can use Git without GitHub, but not GitHub without Git",
-    ],
-    commonMistakes: [
-      "Using 'Git' and 'GitHub' interchangeably",
-      "Thinking GitHub invented Git (Git came first)",
-      "Believing you must use GitHub to use Git",
-      "Not understanding Git is the foundation, GitHub is just hosting",
-    ],
-    tips: [
-      "Master Git fundamentals first, then learn GitHub features",
-      "Remember: Git is the tool, GitHub is the service",
-      "Your Git skills transfer to any hosting platform",
-    ],
-  },
-  {
-    id: "creating-repository",
-    category: "GitHub Fundamentals",
-    title: "Creating Repository",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
-  },
-  {
-    id: "public-vs-private",
-    category: "GitHub Fundamentals",
-    title: "Public vs Private",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
-  },
-  {
-    id: "github-fundamentals-interview-questions",
-    category: "GitHub Fundamentals",
-    title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    lastUpdated: "2026-02-14",
   },
 
   // ===== REMOTE REPOSITORIES =====
@@ -5337,125 +4888,1300 @@ export const gitContent: ContentSection[] = [
     id: "upstream-tracking",
     category: "Remote Repositories",
     title: "Upstream Tracking",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Link your local branch to a remote branch to simplify push and pull operations.",
+    overview:
+      "Tracking relationships (or 'upstream' branches) tell Git which remote branch corresponds to your local branch. When tracking is set, you can use `git push` and `git pull` without specifying the remote or branch name.",
+    detailedExplanation: [
+      "When you clone a repo, your local `main` automatically tracks `origin/main`.",
+      "For new branches, you must explicitly set the upstream branch the first time you push: `git push -u origin <branch>`.",
+      "You can see which remote branch your local branch is tracking with `git branch -vv`.",
+      "If you don't set an upstream, Git will ask you to specify the remote and branch every time you push.",
+    ],
+    codeBlocks: [
+      {
+        label: "Set upstream while pushing",
+        language: "bash",
+        code: "git push -u origin feature-login",
+        explanation: "Pushes and sets tracking (standard method)",
+      },
+      {
+        label: "Set upstream for existing branch",
+        language: "bash",
+        code: "git branch --set-upstream-to=origin/main main",
+        explanation: "Links local main to origin/main manually",
+      },
+      {
+        label: "Check tracking",
+        language: "bash",
+        code: "git branch -vv",
+        explanation: "Shows local branches and their remote counterparts",
+      },
+    ],
+    keyTakeaways: [
+      "Upstream tracking makes `git pull` and `git push` work without arguments",
+      "Use `-u` (short for `--set-upstream`) on your first push",
+      "Tracking is essential for keeping local and remote branches in sync",
+    ],
+    commonMistakes: [
+      "Typing the full `git push origin branchname` every time instead of setting upstream",
+      "Getting 'no upstream branch' error and not knowing what it means",
+      "Thinking tracking happens automatically for new local branches (it doesn't)",
+    ],
   },
   {
     id: "remote-repositories-interview-questions",
     category: "Remote Repositories",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions regarding remotes, fetching, and pushing.",
+    overview:
+      "This section covers the mechanics of interacting with remote repositories. Expect questions on the difference between fetch and pull, how to manage remote URLs, and how to handle rejected pushes.",
+    detailedExplanation: [
+      "The most common question is 'fetch vs pull'. Fetch updates remote-tracking branches; Pull does fetch + merge.",
+      "Understand what `origin` is (just a default alias/name).",
+      "Be able to explain what a 'fast-forward' merge is in the context of pulling.",
+    ],
+    keyTakeaways: [
+      "Fetch is safe; Pull can cause conflicts",
+      "Origin is a convention, not a keyword",
+      "Force with lease is safer than force",
+    ],
+    commonMistakes: [
+      "Saying `git pull` is safer than `git fetch` (it's the opposite)",
+      "Not knowing how to change a remote URL (e.g., HTTPS to SSH)",
+    ],
+    interviewQuestions: [
+      "What is the difference between `git fetch` and `git pull`?",
+      "What does `git push --force` do and why is it dangerous?",
+      "How do you change the URI (URL) for a remote?",
+      "What is 'origin' in Git?",
+      "How do you see which remote branch your local branch is tracking?",
+      "What does `git push -u` do?",
+      "How do you delete a remote branch?",
+      "What is a 'bare' repository?",
+      "How do you prune deleted remote branches from your local list?",
+    ],
+    lastUpdated: "2026-02-14",
+  },
+
+  // ===== WORKFLOWS & BEST PRACTICES =====
+  {
+    id: "feature-branch-workflow",
+    category: "Workflows & Best Practices",
+    title: "Feature Branch Workflow",
+    description:
+      "The standard workflow: create a branch for every new feature or fix.",
+    overview:
+      "The Feature Branch Workflow allows developers to work on new features in dedicated branches instead of the main code base. This ensures the main branch always contains production-quality code and allows multiple developers to work in parallel without blocking each other.",
+    detailedExplanation: [
+      "1. Pull latest main: Start with a fresh codebase.",
+      "2. Create branch: `git checkout -b feature/my-feature`.",
+      "3. Work & Commit: precise, logical commits.",
+      "4. Push: `git push -u origin feature/my-feature`.",
+      "5. Open Pull Request: Review and discuss.",
+      "6. Merge: Integrate into main and delete the feature branch.",
+    ],
+    codeBlocks: [
+      {
+        label: "Start feature",
+        language: "bash",
+        code: "git checkout main\ngit pull\ngit checkout -b feature/new-login-screen",
+        explanation: "Always start from updated main",
+      },
+      {
+        label: "Finish feature",
+        language: "bash",
+        code: "git push origin feature/new-login-screen\n# Go to GitHub to open PR",
+        explanation: "Push execution to remote",
+      },
+    ],
+    keyTakeaways: [
+      "Isolates work in progress from stable code",
+      "Enables code review via Pull Requests",
+      "Standard for most professional teams",
+    ],
+    commonMistakes: [
+      "Working directly on main",
+      "Forgetting to pull main before creating feature branch",
+      "Long-lived feature branches that become hard to merge",
+    ],
+    tips: [
+      "Keep feature branches short-lived (days, not months)",
+      "Sync with main regularly if the feature takes time",
+    ],
+  },
+  {
+    id: "git-flow",
+    category: "Workflows & Best Practices",
+    title: "Git Flow",
+    description:
+      "A strict branching model designed for scheduled project releases.",
+    overview:
+      "Git Flow is a robust framework for managing large projects. It assigns specific roles to branches: `main` (production), `develop` (integration), `feature/*` (new work), `release/*` (prep for production), and `hotfix/*` (urgent fixes).",
+    detailedExplanation: [
+      "Development happens on `develop`.",
+      "Features branch off `develop` and merge back to `develop`.",
+      "When ready to release, a `release` branch is created off `develop`.",
+      "Once tested, `release` merges into `main` (with a tag) AND `develop`.",
+      "Hotfixes branch off `main` and merge into both `main` and `develop`.",
+    ],
+    codeBlocks: [
+      {
+        label: "Initialize Git Flow",
+        language: "bash",
+        code: "git flow init",
+        explanation:
+          "Sets up the branch structure (requires git-flow extension)",
+      },
+    ],
+    keyTakeaways: [
+      "Strict structure good for versioned software products",
+      "Keeps development separate from shipping code",
+      "Can be complex for simple web apps (overkill)",
+    ],
+    commonMistakes: [
+      "Using Git Flow for simple CD (Continuous Deployment) projects",
+      "Forgetting to back-merge hotfixes to develop",
+    ],
+    tips: [
+      "Consider 'GitHub Flow' or 'Trunk Based' if Git Flow feels too heavy",
+      "Use CLI tools like git-flow-avh to automate the branching",
+    ],
+  },
+  {
+    id: "trunk-based-development",
+    category: "Workflows & Best Practices",
+    title: "Trunk Based Development",
+    description:
+      "A modern, high-speed workflow where everyone commits to main frequently.",
+    overview:
+      "In Trunk Based Development, developers merge small, frequent updates to the main branch ('trunk') multiple times a day. It avoids 'merge hell' by keeping branches extremely short-lived. It relies heavily on automated testing and Feature Flags to keep the main branch shippable.",
+    detailedExplanation: [
+      "Instead of long feature branches, you commit small chunks.",
+      "If a feature isn't ready, you hide it behind a Feature Flag so it doesn't affect users.",
+      "This enables Continuous Integration (CI) and Continuous Deployment (CD).",
+    ],
+    codeBlocks: [
+      {
+        label: "Workflow",
+        language: "text",
+        code: "Code -> Test -> Commit to Main -> Auto-Deploy",
+        explanation: "Fast feedback loop",
+      },
+    ],
+    keyTakeaways: [
+      "Requires strong automated tests",
+      "Eliminates long merge conflicts",
+      "The 'modern' way for SaaS and web apps",
+      "You typically fix forward instead of rolling back",
+    ],
+    commonMistakes: [
+      "Pushing broken code to trunk (breaks it for everyone)",
+      "Not using Feature Flags for incomplete work",
+    ],
+    tips: [
+      "Pair programming helps ensure quality without slow PR reviews",
+      "Run tests locally before every push",
+    ],
+  },
+  {
+    id: "commit-message-convention",
+    category: "Workflows & Best Practices",
+    title: "Commit Message Convention",
+    description:
+      "Write clear, structured commit messages (Conventional Commits).",
+    overview:
+      "Standardizing commit messages makes history readable and allows for automated changelog generation. The 'Conventional Commits' specification is the most popular standard.",
+    detailedExplanation: [
+      "Format: `<type>(<scope>): <subject>`",
+      "Types: `feat` (new feature), `fix` (bug fix), `docs` (documentation), `style` (formatting), `refactor` (code change no feature/fix), `test` (tests), `chore` (build tasks).",
+      "Example: `feat(auth): add google login support`",
+    ],
+    codeBlocks: [
+      {
+        label: "Good Commit Message",
+        language: "text",
+        code: "feat(ui): add dark mode switch\n\n- Added toggle in navbar\n- Persists preference to localStorage\n- Updated Tailwind config for dark mode",
+        explanation: "Clear type, scope, summary, and details",
+      },
+    ],
+    keyTakeaways: [
+      "Follows a standard format",
+      "Makes `git log` readable",
+      "Enables automated versioning (Semantic Release)",
+    ],
+    commonMistakes: [
+      "Vague messages: 'fix', 'update', 'wip'",
+      "Mixing multiple changes in one commit",
+    ],
+    tips: [
+      "Use `commitlint` to enforce style in CI",
+      "Think: 'If applied, this commit will... <subject>'",
+    ],
+  },
+  {
+    id: "branch-naming-convention",
+    category: "Workflows & Best Practices",
+    title: "Branch Naming Convention",
+    description: "Naming strategies to keep your repository organized.",
+    overview:
+      "Consistent branch names tell you exactly what a branch is for and who owns it. Common prefixes help categorize work.",
+    detailedExplanation: [
+      "Structure: `category/reference/description`",
+      "Categories: `feature/`, `bugfix/`, `hotfix/`, `release/`, `test/`.",
+      "Examples: `feature/user-profile`, `bugfix/login-error-404`, `hotfix/prod-crash`.",
+    ],
+    codeBlocks: [
+      {
+        label: "Examples",
+        language: "bash",
+        code: "git branch feature/shopping-cart\ngit branch bugfix/header-alignment\ngit branch users/nikhil/experiment-1",
+        explanation: "Clear hierarchy and purpose",
+      },
+    ],
+    keyTakeaways: [
+      "Use slashes `/` to group branches (folders in some GUI tools)",
+      "Keep it lowercase and kebab-case",
+      "Include issue ID if using Jira/Linear (e.g., `feature/JIRA-123-login`)",
+    ],
+    commonMistakes: [
+      "Random names: 'nikhil-test', 'final-final-v2'",
+      "Using spaces or special characters",
+    ],
+    tips: [
+      "Configure your ticketing system to copy-paste branch names",
+      "Stick to one convention as a team",
+    ],
+  },
+  {
+    id: "workflows-best-practices-interview-questions",
+    category: "Workflows & Best Practices",
+    title: "Interview Questions",
+    description:
+      "Common interview questions regarding Git workflows, branching strategies, and commit conventions.",
+    overview:
+      "This section contains interview questions focused on collaboration workflows. Expect questions comparing Git Flow and Trunk Based Development, best practices for commit messages, and how to handle large teams working on a single repository.",
+    detailedExplanation: [
+      "Understand the pros and cons of Git Flow (structured, good for releases) vs Trunk Based Development (fast, good for CI/CD).",
+      "Be prepared to explain why 'Conventional Commits' are useful for automation (changelogs, semantic versioning).",
+      "Questions may ask about how to handle long-running feature branches (hint: don't have them, or rebase frequently).",
+    ],
+    keyTakeaways: [
+      "Trunk Based Development avoids 'merge hell'",
+      "Git Flow is better for versioned software releases",
+      "Consistent commit messages enable automation",
+      "Short-lived branches decrease merge conflicts",
+    ],
+    commonMistakes: [
+      "Thinking Git Flow is the 'best' way for every project",
+      "Writing vague commit messages like 'fix bug'",
+      "Not rebasing feature branches against main regularly",
+    ],
+    interviewQuestions: [
+      "What is the difference between Git Flow and Trunk Based Development?",
+      "Why is a 'long-lived' feature branch considered a bad practice?",
+      "What is a 'Conventional Commit' and why should you use it?",
+      "How do you handle a situation where your feature branch is 100 commits behind main?",
+      "What are the benefits of using a naming convention for branches?",
+      "When would you use `git merge --squash`?",
+      "What is a Pull Request and how does it fit into the workflow?",
+      "How do you ensure code quality in a team workflow?",
+    ],
+    lastUpdated: "2026-02-14",
+  },
+
+   // ===== DEBUGGING & MAINTENANCE =====
+  {
+    id: "git-bisect",
+    category: "Debugging & Maintenance",
+    title: "git bisect",
+    description: "Use binary search to find the commit that introduced a bug.",
+    overview:
+      "Git bisect is a debugging tool that helps you find which specific commit introduced a bug. You tell it a 'good' commit (where it worked) and a 'bad' commit (where it's broken), and it automatically checks out the middle commit for you to test, repeating until it pinpoints the culprit.",
+    detailedExplanation: [
+      "This turns a search through 100 commits into ~7 steps (2^7 = 128).",
+      "Process: `git bisect start` -> `git bisect bad` (current) -> `git bisect good <sha>` (old working version).",
+      "Git checks out a commit. You test. If broken, run `git bisect bad`. If working, run `git bisect good`. Repeat.",
+    ],
+    codeBlocks: [
+      {
+        label: "Start bisecting",
+        language: "bash",
+        code: "git bisect start\ngit bisect bad HEAD\ngit bisect good v1.0.0",
+        explanation: "Begin the definition of the search range",
+      },
+      {
+        label: "Mark current commit",
+        language: "bash",
+        code: "git bisect good\n# or\ngit bisect bad",
+        explanation: "Tell Git the status of the current checked-out commit",
+      },
+      {
+        label: "Finish",
+        language: "bash",
+        code: "git bisect reset",
+        explanation: "Return to original branch when done",
+      },
+    ],
+    keyTakeaways: [
+      "Fastest way to find a regression in history",
+      "Can be automated with `git bisect run <script>`",
+      "Requires code to be buildable/testable at each step",
+    ],
+    commonMistakes: [
+      "Forgetting to `git bisect reset` at the end",
+      "Testing the wrong thing (false positives)",
+    ],
+    tips: [
+      "Write a script that returns 0 (good) or 1 (bad) to fully automate it",
+      "Use `git bisect skip` if a commit is untestable (build broken)",
+    ],
+  },
+  {
+    id: "git-blame",
+    category: "Debugging & Maintenance",
+    title: "git blame",
+    description: "See who wrote each line of a file and in which commit.",
+    overview:
+      "Git blame annotates each line of a file with the revision, author, and time. It's useful for understanding the context of why a line was written, not just primarily for 'blaming' someone.",
+    detailedExplanation: [
+      "Shows the commit SHA, author, and timestamp for every line.",
+      "Great for finding out: 'Why was this condition added?' -> Find commit -> Read commit message/PR.",
+    ],
+    codeBlocks: [
+      {
+        label: "Blame a file",
+        language: "bash",
+        code: "git blame index.js",
+        explanation: "Show annotations for whole file",
+      },
+      {
+        label: "Blame specific lines",
+        language: "bash",
+        code: "git blame -L 10,20 index.js",
+        explanation: "Show lines 10 through 20 only",
+      },
+    ],
+    keyTakeaways: [
+      "Used to find CONTEXT, not just culprits",
+      "Shows the last person to touch the line",
+      "Use with GUI (VS Code GitLens) for best experience",
+    ],
+    commonMistakes: [
+      "Blaming code that was just moved (use `-w` to ignore whitespace)",
+      "Judging code without reading the commit message",
+    ],
+    tips: [
+      "Use `git log -S <string>` to search for when code was added/removed if blame is confusing",
+      "In GitHub UI, click 'Blame' button on any file",
+    ],
+  },
+  {
+    id: "debugging-maintenance-interview-questions",
+    category: "Debugging & Maintenance",
+    title: "Interview Questions",
+    description:
+      "Common interview questions covering Git binary search, blame, and repository maintenance.",
+    overview:
+      "This section tests your ability to troubleshoot problems in a repository. Questions focus on identifying when a bug was introduced using `git bisect`, understanding file history with `git blame`, and general maintenance best practices.",
+    detailedExplanation: [
+      "Know how `git bisect` works (binary search) and when to use it (finding regressions).",
+      "`git blame` is for context, not just pointing fingers. It helps understand *why* a change was made.",
+      "Understand basic housekeeping like `git gc` (garbage collection) and managing large files.",
+    ],
+    keyTakeaways: [
+      "git bisect finds bugs in O(log n) time",
+      "git blame shows the last revision for each line",
+      "git fsck checks database integrity",
+      "Large files should be handled with Git LFS",
+    ],
+    commonMistakes: [
+      "Manually checking out commits one by one to find a bug instead of using bisect",
+      "Blaming code without checking if it was just moved (formatting changes)",
+    ],
+    interviewQuestions: [
+      "How do you find which commit introduced a bug?",
+      "Explain how `git bisect` works.",
+      "What command shows who last modified a specific line of a file?",
+      "How can you ignore whitespace changes when running `git blame`?",
+      "What does `git gc` do?",
+      "How do you handle large binary files in Git?",
+      "What is the difference between `git blame` and `git log -p`?",
+      "How do you verify the integrity of a Git repository?",
+    ],
+    lastUpdated: "2026-02-14",
+  },
+
+   // ===== GITHUB FUNDAMENTALS =====
+  {
+    id: "what-is-github",
+    category: "GitHub Fundamentals",
+    title: "What is GitHub",
+    description:
+      "Learn about GitHub, the world's leading platform for hosting Git repositories and collaborating on code.",
+    overview:
+      "GitHub is a cloud-based hosting service for Git repositories. It provides a web interface for Git's version control functionality plus several collaboration features like pull requests, issues, project boards, and code review tools. GitHub has become the de facto standard for open source development and team collaboration.",
+    detailedExplanation: [
+      "GitHub is not Git - it's a platform built on top of Git. While Git is the version control system that tracks changes to your code locally, GitHub is a hosting service that stores your repositories online and adds collaboration features. You can use Git without GitHub, but GitHub requires Git.",
+      "GitHub provides a graphical interface for many Git operations, making Git more accessible to those who prefer not to use the command line. However, understanding Git fundamentals is still essential because GitHub's features are built on Git concepts.",
+      "Beyond basic repository hosting, GitHub offers pull requests (propose and review changes), issues (track bugs and features), actions (CI/CD automation), projects (project management), discussions, wikis, and GitHub Pages for hosting websites directly from repositories.",
+      "GitHub revolutionized open source development by making it easy to fork projects, contribute changes via pull requests, and collaborate with developers worldwide. The social coding aspect - following developers, starring repositories, contributing to projects - created a vibrant ecosystem.",
+    ],
+    codeBlocks: [
+      {
+        label: "Clone from GitHub",
+        language: "bash",
+        code: "git clone https://github.com/username/repository.git",
+        explanation: "Download a repository from GitHub to your local machine",
+      },
+      {
+        label: "Push to GitHub",
+        language: "bash",
+        code: "git push origin main",
+        explanation: "Upload your local commits to GitHub",
+      },
+      {
+        label: "Pull from GitHub",
+        language: "bash",
+        code: "git pull origin main",
+        explanation: "Download and merge changes from GitHub",
+      },
+    ],
+    keyTakeaways: [
+      "GitHub is a hosting platform for Git repositories, not Git itself",
+      "Adds collaboration features: pull requests, issues, code review",
+      "Industry standard for open source and team collaboration",
+      "Provides web interface for Git operations",
+      "Offers CI/CD, project management, and hosting features",
+    ],
+    commonMistakes: [
+      "Confusing Git with GitHub - they're different things",
+      "Thinking you need GitHub to use Git (you don't)",
+      "Not understanding that GitHub just hosts your Git repos",
+      "Expecting Git commands to work on GitHub's web interface",
+    ],
+    tips: [
+      "Learn Git fundamentals before focusing on GitHub features",
+      "Explore GitHub's features beyond just hosting: Actions, Projects, Issues",
+      "Use GitHub for portfolio - recruiters look at GitHub profiles",
+    ],
+  },
+  {
+    id: "git-vs-github",
+    category: "GitHub Fundamentals",
+    title: "Git vs GitHub",
+    description:
+      "Understand the crucial difference between Git (the version control system) and GitHub (the hosting platform).",
+    overview:
+      "Git and GitHub are often confused, but they serve different purposes. Git is the distributed version control system that runs locally on your computer and tracks changes to your code. GitHub is a cloud-based hosting service that stores Git repositories online and adds collaboration features. You can use Git without GitHub, but you can't use GitHub without Git.",
+    detailedExplanation: [
+      "Git is software you install on your computer created by Linus Torvalds in 2005. It works entirely offline, tracking your changes, creating commits, managing branches, all locally. You don't need an internet connection or any external service to use Git - it's a standalone tool.",
+      "GitHub is a company and web-based platform launched in 2008 that hosts Git repositories. It's one of several Git hosting services (others include GitLab, Bitbucket, Gitea). GitHub adds a web interface, collaboration tools like pull requests and code review, and social features like following developers and starring projects.",
+      "The relationship: Git is the foundation, GitHub is built on top of it. When you push to GitHub, you're using Git to send your local commits to GitHub's servers. When you create a pull request on GitHub, you're using GitHub's interface to propose merging Git branches.",
+      "Alternatives to GitHub exist because Git is open source and standardized. If you learn Git, you can work with any Git hosting service. The Git commands remain the same whether you're using GitHub, GitLab, Bitbucket, or self-hosted solutions.",
+    ],
+    codeBlocks: [
+      {
+        label: "Git (local operations)",
+        language: "bash",
+        code: "git init\ngit add .\ngit commit -m 'Local commit'\ngit branch feature\ngit merge feature",
+        explanation: "Git works entirely on your local machine",
+      },
+      {
+        label: "GitHub (remote operations)",
+        language: "bash",
+        code: "git remote add origin https://github.com/user/repo.git\ngit push origin main\ngit pull origin main",
+        explanation: "GitHub commands involve remote repository",
+      },
+    ],
+    keyTakeaways: [
+      "Git = version control system (software on your computer)",
+      "GitHub = hosting service for Git repositories (website/platform)",
+      "Git works offline, GitHub requires internet",
+      "GitHub is one of many Git hosting services",
+      "You can use Git without GitHub, but not GitHub without Git",
+    ],
+    commonMistakes: [
+      "Using 'Git' and 'GitHub' interchangeably",
+      "Thinking GitHub invented Git (Git came first)",
+      "Believing you must use GitHub to use Git",
+      "Not understanding Git is the foundation, GitHub is just hosting",
+    ],
+    tips: [
+      "Master Git fundamentals first, then learn GitHub features",
+      "Remember: Git is the tool, GitHub is the service",
+      "Your Git skills transfer to any hosting platform",
+    ],
+  },
+  {
+    id: "public-vs-private",
+    category: "GitHub Fundamentals",
+    title: "Public vs Private",
+    description: "Understanding repository visibility and access controls.",
+    overview:
+      "GitHub repositories can be either Public or Private. Public repositories are visible to the entire internet and are the foundation of open source. Private repositories are only accessible to you and specific collaborators you invite.",
+    detailedExplanation: [
+      "Public: Anyone can see the code, clone it, and fork it. You choose who can commit (push) to it. Use this for open source projects, portfolios, and knowledge sharing.",
+      "Private: Only you and invited collaborators can see the code. Use this for proprietary software, client work, or projects you aren't ready to share yet.",
+      "Cost: Both are free on GitHub's personal plan. However, private repositories on free accounts historically had limits on the number of collaborators (now mostly lifted but with feature restrictions like branch protection rules).",
+    ],
+    keyTakeaways: [
+      "Public = Open Source (everyone can see)",
+      "Private = Proprietary/Secret (invite only)",
+      "You can change visibility in Settings -> Danger Zone",
+      "Be careful not to commit secrets (API keys) to Public repos!",
+    ],
+    commonMistakes: [
+      "Accidentally publishing private company code as Public",
+      "Committing personal passwords to a Public repo",
+      "Thinking 'Public' means anyone can edit your code (they can only fork/PR, not push directly)",
+    ],
+  },
+  {
+    id: "github-fundamentals-interview-questions",
+    category: "GitHub Fundamentals",
+    title: "Interview Questions",
+    description:
+      "Common interview questions about GitHub, visibility, and repo management.",
+    overview:
+      "This section covers interview questions related to the GitHub platform itself, distinct from Git commands. Expect questions about the difference between Public/Private repos, how to secure them, and the role of READMEs/Licenses.",
+    detailedExplanation: [
+      "Understand the implications of making a repo Public.",
+      "Know what a LICENSE file does and why it's important for Public repos.",
+      "Be prepared to explain forks vs clones in the context of GitHub.",
+    ],
+    keyTakeaways: [
+      "Public repos need licenses to be truly open source",
+      ".gitignore is crucial for keeping repos clean",
+      "GitHub handles remote storage and access control",
+    ],
+    commonMistakes: [
+      "Failing to explain the security risks of Public repos (secrets)",
+      "Not knowing the difference between a fork (GitHub concept) and a branch (Git concept)",
+    ],
+    interviewQuestions: [
+      "What is the difference between a Public and Private repository?",
+      "Can you change a repository from Public to Private later?",
+      "What happens to forks when a Private repository is deleted?",
+      "Why is it important to include a LICENSE file in a public repository?",
+      "What is the purpose of a README.md file?",
+      "How do you prevent creating a repository with the same name as an existing one?",
+      "What is the 'Danger Zone' in GitHub repository settings?",
+      "Does GitHub own your code if you host it publicly?",
+      "What is a GitHub Gist and how does it differ from a repository?",
+    ],
+    lastUpdated: "2026-02-14",
+  },
+
+  // ===== GITHUB COLLABORATION =====
+  {
+    id: "creating-repository",
+    category: "Github Collaboration",
+    title: "Creating a Repository",
+    description: "Initialize a new project and publish it to GitHub.",
+    overview:
+      "Creating a repository is the first step in any Git project. You can start a local repository with `git init` or create one on GitHub and clone it. PUBLISHING a local repository to GitHub links your local work to a remote server, allowing for backup and collaboration.",
+    detailedExplanation: [
+      "To start a new project locally, run `git init`. This creates a hidden `.git` folder that tracks changes. To share this, you create an empty repository on GitHub (without a README, license, or .gitignore to avoid conflicts) and then push your local repo to it.",
+      "Alternatively, you can create a repository on GitHub with initial files (README, .gitignore) and then `git clone` it to your machine. This is often easier for beginners as it sets up the remote connection automatically.",
+      "Connecting a local repo to GitHub involves adding a remote: `git remote add origin <url>`. 'origin' is just the standard name for the main remote server.",
+      "The first push requires setting the upstream branch: `git push -u origin main`. This links your local 'main' branch to the remote 'main' branch, so future pushes can just be `git push`.",
+    ],
+    codeBlocks: [
+      {
+        label: "Option 1: Push existing local repo",
+        language: "bash",
+        code: "git remote add origin https://github.com/user/repo.git\ngit branch -M main\ngit push -u origin main",
+        explanation: "Connects local repo to GitHub and pushes code",
+      },
+      {
+        label: "Option 2: Clone new repo",
+        language: "bash",
+        code: "git clone https://github.com/user/repo.git\ncd repo",
+        explanation: "Downloads remote repo (already connected)",
+      },
+      {
+        label: "Verify remote connection",
+        language: "bash",
+        code: "git remote -v",
+        explanation: "Lists linked remote repositories (fetch/push URLs)",
+      },
+    ],
+    keyTakeaways: [
+      "Two ways to start: init locally then push, OR create remotely then clone",
+      "origin is the default alias for the remote repository URL",
+      "-u flag links local branch to remote branch (upstream)",
+      "Always rename master to main for modern defaults (git branch -M main)",
+    ],
+    commonMistakes: [
+      "Initializing a repo inside another repo (nested .git folders)",
+      "Creating a repo on GitHub with a README and trying to push an existing local repo (causes fatal: refusing to merge unrelated histories)",
+      "Forgetting to add the remote before trying to push",
+    ],
+    tips: [
+      "Use `git clone` for the easiest start",
+      "Use GitHub CLI (`gh repo create`) to do everything from terminal",
+      "Check `git remote -v` if push fails to ensure correct URL",
+    ],
+  },
+  {
+    id: "forking",
+    category: "Github Collaboration",
+    title: "Forking",
+    description:
+      "Create a personal copy of someone else's repository to contribute changes.",
+    overview:
+      "Forking is a GitHub feature (not a Git command) that allows you to create a personal copy of another user's repository. It bridges the gap between reading code and contributing to it. You clone your fork, make changes, and then propose them back to the original project via a Pull Request.",
+    detailedExplanation: [
+      "When you fork a repo, you get a full copy under your GitHub account. You have full write access to this copy, unlike the original repo which you might only have read access to.",
+      "The standard open-source workflow: Fork the repo -> Clone your fork -> Create a branch -> Make changes -> Push to YOUR fork -> Open Pull Request to original repo.",
+      "A fork is not automatically synced with the original repository. You must manually fetch updates from the original (often called 'upstream') to keep your fork up to date.",
+    ],
+    codeBlocks: [
+      {
+        label: "Clone your fork",
+        language: "bash",
+        code: "git clone https://github.com/YOUR-USERNAME/repo.git",
+        explanation: "Downloads your personal copy of the project",
+      },
+      {
+        label: "See remotes",
+        language: "bash",
+        code: "git remote -v\n# origin  https://github.com/YOUR-USERNAME/repo.git (fetch)\n# origin  https://github.com/YOUR-USERNAME/repo.git (push)",
+        explanation: "Shows only your fork initially",
+      },
+    ],
+    keyTakeaways: [
+      "Forking makes a server-side copy on GitHub",
+      "Allows you to modify ANY open-source project freely",
+      "First step in the 'Fork & Pull' workflow",
+      "You need to manually sync your fork with original repo",
+    ],
+    commonMistakes: [
+      "Cloning the original repo instead of your fork (you won't be able to push!)",
+      "Forgetting to keep the fork updated (diverging too far)",
+      "Thinking forking affects the original repository (it doesn't)",
+    ],
+    tips: [
+      "Always clone YOUR fork, not the original",
+      "Use descriptive branch names even on forks",
+      "GitHub now provides a 'Sync Fork' button in the UI for ease",
+    ],
+  },
+  {
+    id: "syncing-fork",
+    category: "Github Collaboration",
+    title: "Syncing a Fork",
+    description: "Keep your fork up-to-date with the original repository.",
+    overview:
+      "Since a fork is a static copy, it doesn't automatically receive updates from the original repository (upstream). Syncing ensures your code is based on the latest version, minimizing conflicts when you eventually submit a Pull Request.",
+    detailedExplanation: [
+      "To sync locally, you typically add a second remote called 'upstream' pointing to the original repository. You then fetch from upstream and merge (or rebase) it into your local main branch.",
+      "The workflow: `git fetch upstream` (downloads updates) -> `git checkout main` -> `git merge upstream/main` (integrates updates). Then you `git push origin main` to update your fork on GitHub.",
+      "Keeping your fork synced prevents 'merge hell' where your feature branch is months behind the main project.",
+    ],
+    codeBlocks: [
+      {
+        label: "Add upstream remote",
+        language: "bash",
+        code: "git remote add upstream https://github.com/ORIGINAL-OWNER/repo.git",
+        explanation: "Links to the original repository",
+      },
+      {
+        label: "Sync main branch",
+        language: "bash",
+        code: "git fetch upstream\ngit checkout main\ngit merge upstream/main",
+        explanation: "Updates local main with original repo's changes",
+      },
+      {
+        label: "Push updates to your fork",
+        language: "bash",
+        code: "git push origin main",
+        explanation: "Updates your GitHub fork properties",
+      },
+      {
+        label: "One-liner sync (if on main)",
+        language: "bash",
+        code: "git pull upstream main",
+        explanation: "Fetch and merge in one step",
+      },
+    ],
+    keyTakeaways: [
+      "upstream = original repo, origin = your fork",
+      "Sync regularly to avoid massive conflicts",
+      "Never commit directly to main in a fork (keep it clean for syncing)",
+      "Feature branches should be rebased onto updated main",
+    ],
+    commonMistakes: [
+      "Forgetting to add the upstream remote",
+      "Merging upstream changes into a feature branch instead of main",
+      "Never syncing and sending a PR with 1000+ conflict lines",
+    ],
+    tips: [
+      "Check `git remote -v` to confirm upstream is set",
+      "Use GitHub's 'Sync Fork' button if you don't want to use CLI",
+      "Always sync before starting a new feature branch",
+    ],
+  },
+  {
+    id: "remote-url-management",
+    category: "Github Collaboration",
+    title: "Remote URL Management",
+    description: "View, change, and manage remote repository connections.",
+    overview:
+      "Git remotes are just aliases for URLs. You might need to change a remote URL if you switch from HTTPS to SSH, move a repository to a new organization, or rename a repository. Managing these URLs correctly is key to connectivity.",
+    detailedExplanation: [
+      "The `git remote` command manages the set of tracked repositories. `origin` is the default, but you can have many. For example, a deployment remote (heroku) or a colleague's fork (jane).",
+      "Changing a URL is common when switching authentication methods (HTTPS vs SSH). SSH is generally preferred for security and convenience (no typing passwords).",
+      "`git remote set-url origin <new-url>` updates an existing remote. `git remote rename` and `git remote remove` help organize your connections.",
+    ],
+    codeBlocks: [
+      {
+        label: "View remote URLs",
+        language: "bash",
+        code: "git remote -v",
+        explanation: "Shows fetch and push URLs for each remote",
+      },
+      {
+        label: "Change remote URL",
+        language: "bash",
+        code: "git remote set-url origin git@github.com:user/repo.git",
+        explanation: "Updates 'origin' to use SSH URL",
+      },
+      {
+        label: "Rename a remote",
+        language: "bash",
+        code: "git remote rename origin old-origin",
+        explanation: "Changes alias from 'origin' to 'old-origin'",
+      },
+      {
+        label: "Remove a remote",
+        language: "bash",
+        code: "git remote remove upstream",
+        explanation: "Deletes the connection to 'upstream'",
+      },
+    ],
+    keyTakeaways: [
+      "Remotes are just named bookmarks for URLs",
+      "You can change URLs without losing history",
+      "HTTPS URLs require credential helper or tokens",
+      "SSH URLs require SSH keys set up with GitHub",
+    ],
+    commonMistakes: [
+      "Typing the wrong URL and getting 'Repository not found'",
+      "Trying to push to a read-only HTTP URL",
+      "Confusing `remote set-url` with `remote add`",
+    ],
+    tips: [
+      "Use SSH (git@github.com...) for easier pushing without passwords",
+      "Run `git remote -v` whenever connection fails",
+      "Clean up old remotes from deleted forks",
+    ],
+  },
+  {
+    id: "upstream-remote",
+    category: "Github Collaboration",
+    title: "Upstream Remote",
+    description:
+      "Understand the concept of upstream vs origin in forking workflows.",
+    overview:
+      "In a Fork & Pull workflow, you interact with two remotes: 'origin' (your fork) and 'upstream' (the original project). Understanding the flow of data between these three points (local, origin, upstream) is crucial for contributing to open source.",
+    detailedExplanation: [
+      "Data Flow: Upstream -> Local -> Origin -> Upstream (via PR).",
+      "1. You PULL from Upstream to get latest community changes.",
+      "2. You PUSH to Origin to back up your work and prepare for PR.",
+      "3. You never push to Upstream (usually forbidden).",
+      "4. You open a Pull Request from Origin to Upstream on GitHub website.",
+    ],
+    codeBlocks: [
+      {
+        label: "Standard Fork Setup",
+        language: "bash",
+        code: "git remote add origin <your-fork-url>\ngit remote add upstream <original-repo-url>",
+        explanation: "The standard two-remote configuration",
+      },
+      {
+        label: "Verify setup",
+        language: "bash",
+        code: "git remote -v",
+        explanation:
+          "Should show 4 lines: origin (fetch/push) and upstream (fetch/push)",
+      },
+    ],
+    keyTakeaways: [
+      "Origin = Your Copy (Read/Write)",
+      "Upstream = Original Project (Read Only usually)",
+      "Pull from Upstream, Push to Origin",
+      "Don't confuse the two or you'll get permission errors",
+    ],
+    commonMistakes: [
+      "Trying to push to upstream without permission",
+      "Pulling from origin instead of upstream to update main",
+      "Naming the upstream remote something random like 'source'",
+    ],
+    tips: [
+      "Configuration is per-local-repository",
+      "You can have remotes for teammates too (e.g., 'git remote add susan ...')",
+      "Use 'git fetch --all' to update all remotes at once",
+    ],
+  },
+  {
+    id: "pull-request",
+    category: "Github Collaboration",
+    title: "Pull Request (PR)",
+    description: "Propose changes to a repository and initiate code review.",
+    overview:
+      "A Pull Request (PR) is a platform feature (GitHub/GitLab) that lets you tell others about changes you've pushed to a branch. It's a dedicated forum for discussing the proposed changes, reviewing code, and ensuring quality before merging into the main codebase.",
+    detailedExplanation: [
+      "A PR compares your feature branch with the target branch (usually 'main'). It shows the diff, commits, and allows for line-by-line comments.",
+      "PRs are the heart of collaboration. They run CI/CD tests automatically, require approvals from team members, and prevent broken code from reaching production.",
+      "You don't need to close a PR to update it. Just push new commits to the same branch, and the PR updates automatically. This is key for addressing feedback.",
+    ],
+    codeBlocks: [
+      {
+        label: "Workflow",
+        language: "text",
+        code: "1. Create Branch -> 2. Commit Changes -> 3. Push to Origin\n4. Open PR on GitHub -> 5. Review & Discuss -> 6. Merge",
+        explanation: "The lifecycle of a code change",
+      },
+      {
+        label: "Update an existing PR",
+        language: "bash",
+        code: "git add .\ngit commit -m 'Address review comments'\ngit push origin feature-branch",
+        explanation: "Just push to the same branch to update the PR",
+      },
+    ],
+    keyTakeaways: [
+      "PRs are for discussion and review BEFORE merging",
+      "Pushing to the branch updates the PR automatically",
+      "PRs can trigger automated tests (CI)",
+      "You can draft a PR to show work-in-progress",
+    ],
+    commonMistakes: [
+      "Closing a PR and opening a new one just to update code",
+      "Merging your own PR without review (unless allowed)",
+      "Including unrelated changes in a single PR (keep it focused)",
+    ],
+    tips: [
+      "Write a clear PR description with screenshots/videos",
+      "Link issues using 'Fixes #123' in the description",
+      "Review your own code/diff before creating the PR",
+    ],
+  },
+  {
+    id: "code-review",
+    category: "Github Collaboration",
+    title: "Code Review",
+    description:
+      "Best practices for reviewing code and responding to feedback.",
+    overview:
+      "Code review is a quality assurance process where developers examine each other's code. It's not just about finding bugs; it's about knowledge sharing, maintaining consistency, and improving design.",
+    detailedExplanation: [
+      "As a Reviewer: Be kind and constructive. commenting 'This is bad' is unhelpful. Explain WHY and suggest alternatives. Focus on logic, security, and readability, not just style (use linters for that).",
+      "As an Author: Don't take feedback personally. The goal is better code, not criticizing you. If you disagree, explain your reasoning politely.",
+      "GitHub allows 'Suggestions', where reviewers can write code snippets that authors can commit directly from the UI.",
+    ],
+    codeBlocks: [
+      {
+        label: "Review Checklist",
+        language: "text",
+        code: "- Does it solve the problem?\n- Is it readable and maintainable?\n- Are there tests?\n- Does it follow security best practices?\n- Is documentation updated?",
+        explanation: "What to look for",
+      },
+    ],
+    keyTakeaways: [
+      "Code review improves quality and team knowledge",
+      "Be constructive and specific",
+      "Automate style checks to focus review on logic",
+      "Small PRs are easier to review than massive ones",
+    ],
+    commonMistakes: [
+      "Rubber-stamping (approving without reading)",
+      "Nitpicking styling issues that tools should catch",
+      "Being defensive about feedback",
+      "Reviewing too much code at once (fatigue)",
+    ],
+    tips: [
+      "Review code locally if it's complex",
+      "Use 'Draft PR' status until ready for review",
+      "Batch your comments instead of sending one by one",
+    ],
+  },
+  {
+    id: "squash-merge",
+    category: "Github Collaboration",
+    title: "Squash & Merge",
+    description: "Combine all PR commits into a single commit upon merging.",
+    overview:
+      "Squash & Merge is a GitHub option that takes all the commits from a Pull Request and combines them into one single commit on the target branch. This creates a very clean, linear history on the main branch, hiding the messy 'work in progress' commits.",
+    detailedExplanation: [
+      "Instead of seeing 'Typo', 'WIP', 'Fix bug', 'Fix bug again' in the main history, you just see one commit: 'Add Feature X (#123)'.",
+      "This is excellent for the main branch history but destroys the individual commit history of the feature branch. Use this when the individual steps aren't important, just the final result.",
+      "It makes 'git revert' easier because the entire feature is one commit.",
+    ],
+    codeBlocks: [
+      {
+        label: "Visual Comparison",
+        language: "text",
+        code: "Normal Merge:  o---o---o---M  (All commits preserved)\nSquash Merge:  o------------S  (One single commit)",
+        explanation: "Squash compresses history",
+      },
+    ],
+    keyTakeaways: [
+      "Keeps main branch history clean and linear",
+      "Combines messy WIP commits into one",
+      "Perfect for features that don't need granular history",
+      "Changes the Author to the person clicking merge (usually)",
+    ],
+    commonMistakes: [
+      "Squashing when individual commit history IS important",
+      "writing a vague commit message for the squashed commit",
+      "Confusing squash merge (GitHub) with git merge --squash (Local)",
+    ],
+    tips: [
+      "Most open source projects prefer Squash & Merge",
+      "Ensure the final commit message is descriptive",
+      "Use it for small to medium features",
+    ],
+  },
+  {
+    id: "rebase-merge",
+    category: "Github Collaboration",
+    title: "Rebase & Merge",
+    description:
+      "Replay PR commits onto the target branch for a linear history.",
+    overview:
+      "Rebase & Merge replays the commits from the PR one by one onto the base branch. Unlike a regular merge, it doesn't create a merge commit. Unlike squash, it preserves individual commits. It forces a linear history.",
+    detailedExplanation: [
+      "This is like running `git rebase main` locally and then doing a fast-forward merge.",
+      "It's great if you want to keep the commit history but avoid the 'diamond shape' of merge bubbles in the graph.",
+      "However, if the commits are messy ('fix', 'fix again'), they will all pollute the main history. It works best when the PR author has already cleaned up their commits.",
+    ],
+    codeBlocks: [
+      {
+        label: "Visual Comparison",
+        language: "text",
+        code: "Normal Merge:  o---o-M\nRebase Merge:  o---o---o  (Linear, no merge commit)",
+        explanation: "Commits are reapplied on top of main",
+      },
+    ],
+    keyTakeaways: [
+      "Creates a linear history without merge commits",
+      "Preserves individual commits (unlike squash)",
+      "Requires clean commit history from the author",
+      "Can't easily revert the whole feature (must revert multiple commits)",
+    ],
+    commonMistakes: [
+      "Using this with messy PRs (pollutes history)",
+      " expecting a merge commit to mark the integration point",
+      "Not testing that the reordered commits still work individually",
+    ],
+    tips: [
+      "Enforce 'Linear history' in GitHub branch protection",
+      "Ask contributors to squash their own commits before merging",
+      "Use for projects that demand a strictly linear timeline",
+    ],
   },
 
   // ===== FORKING & OPEN SOURCE =====
   {
     id: "what-is-fork",
     category: "Forking & Open Source",
-    title: "What is Fork",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "What is a Fork?",
+    description:
+      "A server-side copy of a repository that allows you to freely experiment without affecting the original project.",
+    overview:
+      "A fork is a personal copy of another user's repository that lives on your account. Forking allows you to freely make changes to a project without affecting the original repository. It is the fundamental mechanism for contributing to open source projects where you do not have write access.",
+    detailedExplanation: [
+      "Forking is not a Git command; it is a feature provided by Git hosting services like GitHub.",
+      "When you fork a repository, you get a full copy of the code, history, and branches under your own username.",
+      "You have full read/write access to your fork, allowing you to push changes, create branches, and delete it if needed.",
+      "The connection between your fork and the original repository allows you to easily submit Pull Requests to propose your changes back to the original project.",
+    ],
+    codeBlocks: [
+      {
+        label: "Visual Workflow",
+        language: "text",
+        code: "Original Repo (upstream)  ->  Fork (origin)  ->  Local Clone",
+        explanation: "The three copies of code involved in forking",
+      },
+    ],
+    keyTakeaways: [
+      "Forking copies a repo to your account",
+      "Enables contribution without write access to original",
+      "Bridge between reading code and writing code",
+      "Distinct from cloning (which copies to your local machine)",
+    ],
+    commonMistakes: [
+      "Confusing Fork (GitHub copy) with Clone (Local copy)",
+      "Thinking forking notifies the original author (it usually does)",
+      "Expecting the fork to automatically stay updated with the original (it doesn't)",
+    ],
   },
   {
     id: "fork-workflow",
     category: "Forking & Open Source",
-    title: "Fork Workflow",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "The Forking Workflow",
+    description:
+      "The standard process for contributing to open source projects.",
+    overview:
+      "The 'Fork and Pull' workflow is the standard way to contribute to open source. It involves forking the repo, cloning it locally, creating a branch, making changes, pushing to your fork, and finally opening a Pull Request.",
+    detailedExplanation: [
+      "1. Fork the repository on GitHub.",
+      "2. Clone your fork to your local machine (`git clone <your-fork-url>`).",
+      "3. Create a new branch for your feature or fix (`git checkout -b fix/typo`).",
+      "4. Make changes and commit them.",
+      "5. Push the branch to YOUR fork (`git push origin fix/typo`).",
+      "6. Open a Pull Request on GitHub from your fork to the original repository.",
+    ],
+    codeBlocks: [
+      {
+        label: "Step-by-step commands",
+        language: "bash",
+        code: "git clone https://github.com/YOUR-USERNAME/repo.git\ncd repo\ngit checkout -b feature/awesome-idea\n# ... make changes ...\ngit commit -am 'Add awesome idea'\ngit push origin feature/awesome-idea",
+        explanation: "Standard contribution loop",
+      },
+    ],
+    keyTakeaways: [
+      "Always work on a branch, never on main",
+      "Push to 'origin' (your fork), not 'upstream' (original repo)",
+      "Pull Request compares your fork's branch to original's main",
+    ],
+    commonMistakes: [
+      "Trying to push directly to the original repository (permission denied)",
+      "Committing to main branch (makes syncing hard)",
+      " forgetting to add the upstream remote for syncing",
+    ],
   },
   {
     id: "sync-fork",
     category: "Forking & Open Source",
-    title: "Sync Fork",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Syncing a Fork (Open Source)",
+    description:
+      "Keeping your contribution branch up to date with the rapidly changing original project.",
+    overview:
+      "Open source projects move fast. While you are working on your feature, the original repository (upstream) might have accepted other PRs. Syncing ensures your code is based on the latest version, preventing merge conflicts when you submit your PR.",
+    detailedExplanation: [
+      "To sync, you need to fetch changes from the 'upstream' remote and merge them into your local branch.",
+      "If you are working on a feature branch, it is often better to `rebase` your branch onto `upstream/main` to keep a clean history.",
+      "GitHub also provides a 'Sync Fork' button in the web UI which updates your fork's main branch, which you can then pull.",
+    ],
+    codeBlocks: [
+      {
+        label: "Sync via CLI (Rebase method)",
+        language: "bash",
+        code: "git fetch upstream\ngit checkout feature-branch\ngit rebase upstream/main",
+        explanation: "Replays your work on top of latest upstream changes",
+      },
+      {
+        label: "Sync via CLI (Merge method)",
+        language: "bash",
+        code: "git fetch upstream\ngit merge upstream/main",
+        explanation: "Standard merge update",
+      },
+    ],
+    keyTakeaways: [
+      "Keeping synced reduces 'merge hell'",
+      "Rebasing is preferred for feature branches in open source",
+      "'Sync Fork' button is a convenient shortcut for updating main",
+    ],
+    commonMistakes: [
+      "Never syncing and discovering months of conflicts later",
+      "Force pushing after rebase without communicating (if shared)",
+    ],
   },
   {
     id: "forking-open-source-interview-questions",
     category: "Forking & Open Source",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions about open source contributions and forking models.",
+    overview:
+      "This section covers the soft skills and technical details of open source. Expect questions about licensing, the difference between forking and branching, and how to handle rejected Pull Requests.",
+    detailedExplanation: [
+      "Understand why projects use Forks instead of just giving everyone write access (security, code review enforcement).",
+      "Be able to explain what a CLA (Contributor License Agreement) is.",
+      "Know how to update a Pull Request after you've already opened it (just push more commits to the branch).",
+    ],
+    keyTakeaways: [
+      "Forking = Decentralized collaboration",
+      "PRs are distinct from the code itself",
+      "Licensing dictates how you can use the fork",
+    ],
+    commonMistakes: [
+      "Thinking a PR is a one-time 'package' (it updates dynamically with the branch)",
+      "Not checking the license before forking",
+    ],
+    interviewQuestions: [
+      "What is the difference between forking a repository and cloning it?",
+      "Why can't you just push to an open source repository directly?",
+      "How do you update a Pull Request that is already open?",
+      "What happens to your fork if the original repository is deleted?",
+      "What is an 'upstream' remote?",
+      "Can you make a private fork of a public repository?",
+      "What is a CLA and why do some projects require it?",
+      "How do you resolve conflicts between your fork and the upstream repo?",
+      "What is the difference between merging and rebasing when syncing a fork?",
+    ],
+    lastUpdated: "2026-02-14",
   },
 
   // ===== PULL REQUEST / MERGE REQUEST =====
   {
     id: "what-is-pull-request",
     category: "Pull Request / Merge Request",
-    title: "What is Pull Request",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "What is a Pull Request?",
+    description:
+      "The core collaboration mechanism for reviewing and merging code.",
+    overview:
+      "A Pull Request (PR) - called a Merge Request (MR) in GitLab - is a method of submitting contributions to a project. It asks the maintainers to pull your changes into their repository. It provides a dedicated forum for discussing the proposed changes before they are merged.",
+    detailedExplanation: [
+      "A PR is not a Git command; it's a platform feature (GitHub, GitLab, Bitbucket).",
+      "It shows the diff between your branch and the target branch (usually main).",
+      "It allows for line-by-line code review, comments, and automated testing (CI) to run before the code is accepted.",
+    ],
+    keyTakeaways: [
+      "PRs are about communication and review",
+      "They act as a quality gate before code enters production",
+      "You can continue pushing commits to a PR branch to update it",
+    ],
+    commonMistakes: [
+      "Thinking a PR merges code automatically (it just proposes it)",
+      "Opening a PR for a branch that has no changes",
+    ],
   },
   {
     id: "create-pull-request",
     category: "Pull Request / Merge Request",
-    title: "Create Pull Request",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Creating a Pull Request",
+    description: "How to open a PR to propose changes.",
+    overview:
+      "After pushing your branch to GitHub, you can open a PR. You select the 'base' branch (where you want your code to go) and the 'compare' branch (your new code).",
+    detailedExplanation: [
+      "GitHub usually detects your recently pushed branch and shows a 'Compare & pull request' button.",
+      "If not, go to the 'Pull requests' tab and click 'New pull request'.",
+      "Draft PRs are a useful feature for showing work-in-progress code that isn't ready for review yet.",
+    ],
+    codeBlocks: [
+      {
+        label: "Process",
+        language: "text",
+        code: "1. git push origin feature-branch\n2. Go to GitHub repo\n3. Click 'Compare & pull request'\n4. Write description filling out the template\n5. Click 'Create pull request'",
+        explanation: "Standard workflow",
+      },
+    ],
+    keyTakeaways: [
+      "Write a clear title and description",
+      "Link related issues (e.g., 'Closes #123')",
+      "Use screenshots for UI changes",
+      "Assign reviewers to get attention",
+    ],
+    commonMistakes: [
+      "Leaving the description blank",
+      "Creating a PR against the wrong base branch (e.g., merging to master instead of develop)",
+    ],
   },
   {
     id: "review-pull-request",
     category: "Pull Request / Merge Request",
-    title: "Review Pull Request",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Reviewing a Pull Request",
+    description: "Best practices for providing and receiving code feedback.",
+    overview:
+      "Code review is a critical skill. It's not just about finding bugs, but about knowledge sharing, consistency, and maintaining code quality. GitHub allows reviewers to comment on specific lines, request changes, or approve the PR.",
+    detailedExplanation: [
+      "As a reviewer: Be kind but rigorous. Explain *why* you are requesting a change. Use 'Suggestion' feature to offer code fixes directly.",
+      "As an author: Don't take feedback personally. Respond to every comment. If you disagree, explain your reasoning respectfully.",
+    ],
+    keyTakeaways: [
+      "Review logic, style, and tests",
+      "Check out the branch locally if you need to verify functionality",
+      "Approve only when you are confident the code is safe to merge",
+    ],
+    commonMistakes: [
+      "Rubber-stamping (approving without reading)",
+      "Nitpicking styling issues that a linter should catch",
+      "Reviewing your own PR (bad practice, often blocked)",
+    ],
   },
   {
     id: "merge-pull-request",
     category: "Pull Request / Merge Request",
-    title: "Merge Pull Request",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Merging a Pull Request",
+    description: "Strategies for integrating approved changes.",
+    overview:
+      "Once a PR is approved and checks pass, it can be merged. GitHub offers three main merge strategies: Create a merge commit (standard), Squash and merge (combines all commits into one), and Rebase and merge (linear history).",
+    detailedExplanation: [
+      "Merge commit: Preserves all history and branch structure. Good for visualizing feature branches.",
+      "Squash and merge: Takes all commits from the PR and squashes them into a single commit on main. Keeps main history clean but loses individual commit detail.",
+      "Rebase and merge: Replays commits on top of main. Linear history, but can be tricky with conflicts.",
+    ],
+    keyTakeaways: [
+      "Squash and merge is popular for keeping the main branch clean",
+      "Always delete the branch after merging to avoid clutter",
+      "Ensure all CI checks (tests, linting) persist before merging",
+    ],
+    commonMistakes: [
+      "Merging without waiting for CI checks to pass",
+      "Squashing a feature that really should have been multiple atomic commits",
+    ],
   },
   {
     id: "close-pull-request",
     category: "Pull Request / Merge Request",
-    title: "Close Pull Request",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Closing a Pull Request",
+    description: "What to do when a PR is rejected or abandoned.",
+    overview:
+      "Sometimes code shouldn't be merged. Maybe the feature is no longer needed, or the approach was wrong. In these cases, you 'close' the PR without merging it.",
+    detailedExplanation: [
+      "Closing a PR does not delete the branch; it just marks the discussion as finished.",
+      "You can always reopen a closed PR if you change your mind.",
+      "It is polite to leave a comment explaining *why* you are closing it (e.g., 'Superceded by PR #456').",
+    ],
+    keyTakeaways: [
+      "Don't be afraid to close stale PRs",
+      "Closing is non-destructive",
+      "Provide context for future reference",
+    ],
+    commonMistakes: [
+      "Leaving dead PRs open for months (confuses the team)",
+      "Deleting the branch without closing the PR (leaves a 'ghost' PR)",
+    ],
   },
   {
     id: "pull-request-interview-questions",
     category: "Pull Request / Merge Request",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Common interview questions about Code Review and Merge strategies.",
+    overview:
+      "This section covers the soft skills of code review and the technical details of merge strategies. Expect questions on how to handle disagreements, what 'CI' means in the context of a PR, and the difference between squashing and merging.",
+    detailedExplanation: [
+      "Be prepared to discuss your favorite merge strategy (Squash vs Merge Commit) and why.",
+      "Know how to resolve a merge conflict in a PR UI (or locally).",
+      "Understand the concept of 'Branch Protection Rules' (e.g., requiring 1 approval before merge).",
+    ],
+    keyTakeaways: [
+      "Code review is about quality assurance",
+      "Merge conflicts are normal",
+      "CI/CD pipelines usually run on PRs",
+    ],
+    commonMistakes: [
+      "Not knowing the difference between 'Squash' and 'Merge'",
+      "Saying you approve PRs without reading them",
+    ],
+    interviewQuestions: [
+      "What is the difference between 'Squash and Merge' and 'Create a Merge Commit'?",
+      "How do you handle a code review where you strongly disagree with the feedback?",
+      "What is CI (Continuous Integration) and why is it important for PRs?",
+      "What are Branch Protection Rules?",
+      "Can you merge a PR with conflicts?",
+      "What is the purpose of a 'Draft' Pull Request?",
+      "How do you reference a GitHub issue in a PR so it closes automatically?",
+      "Why should you delete the branch after merging?",
+      "What is 'CODEOWNERS' file in GitHub?",
+    ],
+    lastUpdated: "2026-02-14",
   },
 
   // ===== GITHUB DESKTOP =====
@@ -5463,133 +6189,312 @@ export const gitContent: ContentSection[] = [
     id: "install-github-desktop",
     category: "GitHub Desktop",
     title: "Install GitHub Desktop",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Setting up the official GUI for GitHub.",
+    overview:
+      "GitHub Desktop is an open-source Electron-based application that allows you to interact with GitHub using a graphical user interface (GUI) instead of the command line. It wraps core Git commands in a visual layer, making it easier to visualize diffs, manage branches, and resolve conflicts.",
+    detailedExplanation: [
+      "Download the installer from desktop.github.com.",
+      "Install and sign in with your GitHub account.",
+      "It automatically configures your Git name and email, saving you the `git config` steps.",
+    ],
+    keyTakeaways: [
+      "Great for beginners who are intimidated by the terminal",
+      "Visualizes changes and history much better than the CLI",
+      "Available for macOS and Windows (Linux is community-supported)",
+    ],
+    commonMistakes: [
+      "Assuming you can't use the CLI if you install Desktop (you can use both interchangeably)",
+      "Not signing in, which limits functionality",
+    ],
   },
   {
     id: "clone-via-desktop",
     category: "GitHub Desktop",
     title: "Clone via Desktop",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Downloading a repository without touching the terminal.",
+    overview:
+      "You can clone repositories directly from the GitHub website into GitHub Desktop. This sets up the local folder and remote connection automatically.",
+    detailedExplanation: [
+      "On GitHub.com repo page: Click 'Code' -> 'Open with GitHub Desktop'.",
+      "In Desktop app: File -> Clone Repository -> Select from your list or paste URL.",
+    ],
+    codeBlocks: [
+      {
+        label: "Visual Step",
+        language: "text",
+        code: "Green 'Code' Button -> Local -> Open with GitHub Desktop",
+        explanation: "The easiest way to clone",
+      },
+    ],
+    keyTakeaways: [
+      "Eliminates the need to copy-paste URLs manually",
+      "Automatically maps the folder to your default project directory",
+    ],
+    commonMistakes: [
+      "Cloning into a nested folder by accident",
+      "Forgetting where you saved the repo (check Preferences for default path)",
+    ],
   },
   {
     id: "commit-via-desktop",
     category: "GitHub Desktop",
     title: "Commit via Desktop",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Staging and committing changes visually.",
+    overview:
+      "GitHub Desktop shows changed files in the left sidebar. You can check/uncheck specific files (or even specific lines!) to stage them, type a summary, and click 'Commit'.",
+    detailedExplanation: [
+      "The checkbox system replaces `git add`. Checked files are staged.",
+      "You can partial-commit a file by clicking the gutter to select specific lines.",
+      "The 'Summary' field is the commit title; 'Description' is the body.",
+    ],
+    keyTakeaways: [
+      "Partial staging is much easier in Desktop than CLI",
+      "Visual diff helps you review code before committing",
+      "Warns you if you try to commit to a protected branch",
+    ],
+    commonMistakes: [
+      "Committing all files without reviewing them",
+      "Writing one-word commit messages just because the UI makes it easy",
+    ],
   },
   {
     id: "branch-via-desktop",
     category: "GitHub Desktop",
-    title: "Branch via Desktop",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Branching via Desktop",
+    description: "Creating and switching branches via the UI.",
+    overview:
+      "The 'Current Branch' dropdown allows you to switch branches (checkout) or create new ones. It also handles stashing automatically if you have uncommitted changes when you switch.",
+    detailedExplanation: [
+      "Click 'Current Branch' -> 'New Branch'.",
+      "Type name -> Click 'Create Branch'.",
+      "To publish, simply click 'Publish branch' (which runs `git push -u`).",
+    ],
+    keyTakeaways: [
+      "Prevents 'detached HEAD' states commonly hit in CLI",
+      "Auto-stashing feature is very helpful for multitasking",
+    ],
+    commonMistakes: [
+      "Forgetting to publish the branch after creating it locally",
+      "Branching off the wrong base branch (always check what you are currently on)",
+    ],
   },
   {
     id: "push-pull-via-desktop",
     category: "GitHub Desktop",
-    title: "Push/Pull via Desktop",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Push & Pull via Desktop",
+    description: "Syncing changes with a single button.",
+    overview:
+      "GitHub Desktop simplifies the Fetch/Pull/Push cycle into a single 'Sync' button (or separate buttons if there are specific actions needed). It tells you exactly how many commits you are ahead or behind.",
+    detailedExplanation: [
+      "Click 'Fetch origin' to check for updates.",
+      "If there are updates, it changes to 'Pull origin' with a count (e.g., 'Pull 3 commits').",
+      "If you have local commits, it shows 'Push origin'.",
+    ],
+    keyTakeaways: [
+      "No need to remember git fetch vs git pull",
+      "Visually indicates incoming vs outgoing commits",
+    ],
+    commonMistakes: [
+      "Forgetting to Sync before starting work (leading to conflicts)",
+      "Ignoring the 'Pull' number and pushing anyway (which might fail)",
+    ],
   },
   {
     id: "pull-request-via-desktop",
     category: "GitHub Desktop",
     title: "Pull Request via Desktop",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Previewing and opening PRs from the app.",
+    overview:
+      "While you can't *review* PRs fully in Desktop, you can initiate them. Detailed review happens on GitHub.com.",
+    detailedExplanation: [
+      "After pushing a branch, a 'Create Pull Request' button appears.",
+      "Clicking it opens your default browser to the GitHub 'Open a Pull Request' page with the branch pre-selected.",
+    ],
+    keyTakeaways: [
+      "Desktop acts as a bridge to the web interface for PRs",
+      "You can see which PR is associated with your current branch",
+    ],
+    commonMistakes: [
+      "Looking for a full code review interface inside the Desktop app (it's web-based)",
+    ],
   },
   {
     id: "github-desktop-interview-questions",
     category: "GitHub Desktop",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Common questions about using GUIs vs CLI.",
+    overview:
+      "Interviewers might ask about the pros and cons of using a GUI like GitHub Desktop. The key is to show you understand what's happening *under the hood*, even if you use a tool.",
+    detailedExplanation: [
+      "Be honest if you use a GUI, but explain that you know the underlying Git commands.",
+      "Explain how Desktop handles authentication (OAuth) vs CLI (SSH/PAT).",
+    ],
+    keyTakeaways: [
+      "GUIs are great for diffs and staging",
+      "CLI is better for scripting and advanced operations",
+      "Both are valid professional tools",
+    ],
+    commonMistakes: [
+      "Saying 'I only use Desktop because CLI is too hard' (implies lack of deep understanding)",
+      "Thinking Desktop can do *everything* CLI can (it cannot, e.g., bisect)",
+    ],
+    interviewQuestions: [
+      "What are the advantages of using a filtered GUI for staging files?",
+      "Does GitHub Desktop replace the need to know Git commands?",
+      "How does GitHub Desktop handle credentials?",
+      "Can you use GitHub Desktop with non-GitHub repositories (e.g., GitLab)?",
+      "What happens when you click 'Sync' in GitHub Desktop?",
+      "How do you resolve merge conflicts in GitHub Desktop?",
+    ],
+    lastUpdated: "2026-02-14",
   },
 
   // ===== COMMON ERRORS =====
   {
     id: "detached-head",
     category: "Common Errors",
-    title: "Detached HEAD",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Detached HEAD State",
+    description: "You are not on any branch.",
+    overview:
+      "This scary-sounding error just means you have checked out a specific commit hash instead of a branch name. Any commits you make here will be 'lost' (garbage collected) if you switch away without creating a branch.",
+    detailedExplanation: [
+      "Happens when you run `git checkout <commit-hash>`.",
+      "To fix: Create a branch right where you are: `git checkout -b new-branch-name`.",
+      "To escape (and lose changes): `git checkout main`.",
+    ],
+    codeBlocks: [
+      {
+        label: "Fixing Detached HEAD",
+        language: "bash",
+        code: "git checkout -b my-recovery-branch",
+        explanation: "Saves your current state into a new branch",
+      },
+    ],
+    keyTakeaways: [
+      "Don't panic; your commits are safe as long as you don't switch away",
+      "Always create a branch if you intend to make changes",
+    ],
+    commonMistakes: [
+      "Making a bunch of commits in detached HEAD, switching to main, and losing them all",
+    ],
   },
   {
     id: "non-fast-forward-error",
     category: "Common Errors",
-    title: "Non Fast Forward Error",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Non-Fast-Forward Error",
+    description:
+      "Git cannot merge your changes cleanly without a merge commit.",
+    overview:
+      "A fast-forward merge is when Git just moves the pointer forward. If branches have diverged (both have new unique commits), Git refuses to 'fast-forward'.",
+    detailedExplanation: [
+      "This often happens during `git pull` if you have local commits and the remote also has new commits.",
+      "Fix: `git pull --rebase` (replays your work on top) or `git pull` (creates a merge commit).",
+    ],
+    keyTakeaways: [
+      "Diverged branches require a merge or rebase",
+      "Fast-forwarding is the cleanest way to update, but not always possible",
+    ],
+    commonMistakes: ["Panicking when `git status` says 'diverged'"],
   },
   {
     id: "rejected-push",
     category: "Common Errors",
-    title: "Rejected Push",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    title: "Rejected Push (Fetch First)",
+    description: "The remote contains work that you do not have locally.",
+    overview:
+      "Git protects you from overwriting others' work. If you try to push, but the remote branch has moved on (someone else pushed), Git rejects your push.",
+    detailedExplanation: [
+      "Error message: 'Updates were rejected because the remote contains work that you do not have locally.'",
+      "Solution: You must `git pull` (fetch + merge) or `git pull --rebase` to integrate their changes before you can push yours.",
+    ],
+    keyTakeaways: [
+      "Never use `--force` unless you explicitly want to delete their work",
+      "Pull before you Push",
+    ],
+    commonMistakes: [
+      "Immediately trying `git push --force` to make the error go away (dangerous!)",
+    ],
   },
   {
     id: "merge-conflict-error",
     category: "Common Errors",
     title: "Merge Conflict",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description:
+      "Git cannot automatically resolve differences between two branches.",
+    overview:
+      "A merge conflict happens when two branches have changed the *same line* of a file in different ways, or if one branch deleted a file that the other modified. Git pauses the merge and asks you to choose which version to keep.",
+    detailedExplanation: [
+      "Git inserts conflict markers `<<<<<<< HEAD` (your changes), `=======` (separator), and `>>>>>>> branch-name` (their changes).",
+      "You must open the file, delete the markers, and keep the code you want.",
+      "After resolving, you must `git add <file>` and then `git commit` to finish the merge.",
+    ],
+    codeBlocks: [
+      {
+        label: "Conflict Markers",
+        language: "text",
+        code: "<<<<<<< HEAD\nconsole.log('My Code');\n=======\nconsole.log('Their Code');\n>>>>>>> feature-branch",
+        explanation: "Delete markers and choose one (or combine both)",
+      },
+    ],
+    keyTakeaways: [
+      "Conflicts are normal in collaborative work",
+      "Don't commit the conflict markers!",
+      "Tools like VS Code make resolving conflicts much easier",
+    ],
+    commonMistakes: [
+      "Panicking and deleting the repository",
+      "Resolving the conflict but forgetting to `git add` the file",
+    ],
   },
   {
     id: "force-push-warning",
     category: "Common Errors",
     title: "Force Push Warning",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Overwriting remote history is dangerous.",
+    overview:
+      "Unlike a regular push, `git push --force` destroys commits on the remote that you don't have locally. This can cause your teammates to lose work.",
+    detailedExplanation: [
+      "Only force push if you are the ONLY person working on that branch (e.g., after a rebase).",
+      "Use `git push --force-with-lease` instead. It checks if anyone else has pushed in the meantime and stops you if they have.",
+    ],
+    keyTakeaways: [
+      "Force push is destructive",
+      "Always prefer `--force-with-lease`",
+      "Never force push to shared branches like main or develop",
+    ],
+    commonMistakes: [
+      "Force pushing to main to 'fix' a mess, making it worse for everyone else",
+    ],
   },
   {
     id: "common-errors-interview-questions",
     category: "Common Errors",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Testing your troubleshooting skills.",
+    overview:
+      "Interviewers ask these questions to see if you can get yourself out of trouble. They want to know if you understand *why* errors happen, not just how to copy-paste fixes.",
+    detailedExplanation: [
+      "Be able to explain what a 'Detached HEAD' is in technical terms (HEAD pointing to a commit, not a ref).",
+      "Know the standard procedure for a merge conflict (Edit -> Add -> Commit).",
+    ],
+    keyTakeaways: [
+      "Understanding > Memorizing",
+      "Knowing how to recover (reflog) is a superpower",
+    ],
+    commonMistakes: [
+      "Saying 'I just delete the folder and clone again' (shows lack of confidence)",
+    ],
+    interviewQuestions: [
+      "What causes a 'Detached HEAD' state?",
+      "How do you resolve a merge conflict?",
+      "What is the difference between `git push --force` and `git push --force-with-lease`?",
+      "Why does Git sometimes reject your push?",
+      "What is a 'fast-forward' merge?",
+      "How can you undo a `git reset --hard` if you realized you made a mistake?",
+      "What does 'diverged branches' mean?",
+      "Why is editing history (rebase) dangerous on shared branches?",
+    ],
+    lastUpdated: "2026-02-14",
   },
 
   // ===== PRODUCTION STRATEGY =====
@@ -5597,50 +6502,122 @@ export const gitContent: ContentSection[] = [
     id: "team-collaboration-model",
     category: "Production Strategy",
     title: "Team Collaboration Model",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Structuring how teams work together.",
+    overview:
+      "A successful production strategy often involves a mix of Trunk Based Development for speed and Pull Requests for quality. The 'Golden Path' is to have short-lived feature branches that merge into a protected main branch.",
+    detailedExplanation: [
+      "Define who has write access to which repositories.",
+      "Use 'CODEOWNERS' files to automatically assign reviewers based on which files were touched.",
+      "Establish a 'Definition of Done' (e.g., Code Review + Unit Tests + Integration Tests).",
+    ],
+    keyTakeaways: [
+      "Robots (CI) should enforce style; Humans should enforce logic",
+      "Smaller PRs get reviewed faster",
+      "Don't let the main branch break (it blocks everyone)",
+    ],
+    commonMistakes: [
+      "Having no clear ownership of code modules",
+      "Allowing everyone to push directly to main",
+    ],
   },
   {
     id: "protected-branches",
     category: "Production Strategy",
     title: "Protected Branches",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Enforcing rules on key branches.",
+    overview:
+      "Branch protection rules prevent force pushes, accidental deletions, and unreviewed code from entering critical branches (like main or release).",
+    detailedExplanation: [
+      "Require pull request reviews before merging (usually 1 or 2 approvals).",
+      "Require status checks to pass (CI tests must turn green).",
+      "Include administrators: Ensures even the boss can't break the build by skipping rules.",
+    ],
+    keyTakeaways: [
+      "Branch protection is the first line of defense for production code",
+      "It disables 'Force Push' by default",
+      "It ensures no code enters production without passing CI",
+    ],
+    commonMistakes: [
+      "Protecting too many branches (hinders velocity)",
+      "Not requiring status checks (allows broken code to be merged if a human misses it)",
+    ],
   },
   {
     id: "code-review-process",
     category: "Production Strategy",
     title: "Code Review Process",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Standardizing how code is reviewed.",
+    overview:
+      "A good process balances speed and quality. It shouldn't take days to get a review. Teams often use 'async' reviews but jump on calls for complex architecture changes.",
+    detailedExplanation: [
+      "Use templates for PR descriptions to ensure context is provided.",
+      "Set expectations for turnaround time (e.g., 'Reviews should be done within 24 hours').",
+      "Distinguish between 'Blockers' (must fix) and 'Nits' (nice to fix).",
+    ],
+    keyTakeaways: [
+      "Context is king: Explain *why* you made the change",
+      "Be respectful and constructive",
+      "Automate what can be automated (linting)",
+    ],
+    commonMistakes: [
+      "Using code review to discuss big design changes (too late; do that in planning)",
+      "bikeshedding (arguing over minor details)",
+    ],
   },
   {
     id: "ci-cd-overview",
     category: "Production Strategy",
     title: "CI/CD Overview",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "Automating the path to production.",
+    overview:
+      "Continuous Integration (CI) and Continuous Deployment (CD) are the backbone of modern software engineering. CI ensures that every commit is tested. CD ensures that every valid commit is deployed (or at least ready to be).",
+    detailedExplanation: [
+      "CI: Runs on every push. Checks formatting (Prettier), linting (ESLint), and tests (Jest/Vitest).",
+      "CD: Runs on merge to main. Builds the production assets and pushes them to the server (e.g., Vercel, AWS).",
+      "GitHub Actions is the integrated tool for this, defined in `.github/workflows` YAML files.",
+    ],
+    keyTakeaways: [
+      "A broken build is an emergency; fix it immediately",
+      "Tests give you confidence to refactor",
+      "Deployment should be a boring, automated event",
+    ],
+    commonMistakes: [
+      "Treating CI as 'optional' and ignoring red X marks",
+      "Deploying from your local machine instead of the CI server (it works on my machine!)",
+    ],
   },
   {
     id: "production-strategy-interview-questions",
     category: "Production Strategy",
     title: "Interview Questions",
-    description: "",
-    overview: "",
-    detailedExplanation: [],
-    keyTakeaways: [],
-    commonMistakes: [],
+    description: "High-level questions about software delivery.",
+    overview:
+      "For senior roles, interviewers care less about `git add` and more about how you manage complexity and risk. These questions test your understanding of the software development lifecycle (SDLC).",
+    detailedExplanation: [
+      "Be prepared to design a workflow for a team of 50 developers.",
+      "Understand the trade-offs between 'deploying fast' and 'deploying safely'.",
+      "Know what 'Blue/Green Deployment' or 'Canary Release' means (releasing to a small % of users first).",
+    ],
+    keyTakeaways: [
+      "Process exists to scale the team, not to slow it down",
+      "Automation reduces human error",
+      "You should know how your code gets to the user",
+    ],
+    commonMistakes: [
+      "Thinking your job ends when you merge the PR",
+      "Not knowing if the project uses Semantic Versioning",
+    ],
+    interviewQuestions: [
+      "How do you handle a broken build in the main branch?",
+      "What is the difference between specific Continuous Integration and Continuous Deployment?",
+      "Why are 'long-lived feature branches' bad for CI/CD?",
+      "How would you design a branching strategy for a team with daily releases?",
+      "What is the role of a 'staging' environment?",
+      "Explain the concept of 'Feature Flags' and how they relate to Git branches.",
+      "How do you secure secrets (API keys) in a CI/CD pipeline?",
+      "What is 'Semantic Versioning' (SemVer)?",
+      "Why is it important to use immutable build artifacts?",
+    ],
+    lastUpdated: "2026-02-14",
   },
 ];
