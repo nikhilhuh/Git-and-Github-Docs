@@ -16,10 +16,8 @@ export const OnThisPage: React.FC<OnThisPageProps> = ({ isDark }) => {
   const [activeId, setActiveId] = useState<string>("");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
-  const observer = useRef<IntersectionObserver | null>(null);
-
+  // 1. Robust Heading Extraction (MutationObserver)
   useEffect(() => {
-    // 1. Extract headings from the main content
     const extractHeadings = () => {
       const mainElement = document.querySelector("main");
       if (!mainElement) return;
@@ -46,42 +44,73 @@ export const OnThisPage: React.FC<OnThisPageProps> = ({ isDark }) => {
       setHeadings(items);
     };
 
-    // Delay slightly to ensure DOM is rendered (React Router transitions)
-    const timer = setTimeout(extractHeadings, 100);
+    // Initial extraction
+    extractHeadings();
 
-    return () => clearTimeout(timer);
+    // Re-run extraction if DOM changes (e.g., lazy loaded content)
+    const observer = new MutationObserver(extractHeadings);
+    const mainElement = document.querySelector("main");
+    if (mainElement) {
+      observer.observe(mainElement, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    return () => observer.disconnect();
   }, [location.pathname]);
 
+  // 2. Scroll Spy Logic (Scroll Event)
   useEffect(() => {
-    // 2. Setup IntersectionObserver to track active section
-    if (observer.current) observer.current.disconnect();
+    const handleScroll = () => {
+      if (headings.length === 0) return;
 
-    observer.current = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries.find((entry) => entry.isIntersecting);
-        if (visibleEntry) {
-          setActiveId(visibleEntry.target.id);
-        }
-      },
-      { rootMargin: "-100px 0% -80% 0%" },
-    );
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
 
-    const headingElements = Array.from(
-      document.querySelectorAll("h2, h3"),
-    ).filter((el) => {
-      const isExampleLabel =
-        el.tagName === "H3" &&
-        el.closest("section")?.querySelector("h2")?.id === "code-examples";
-      return !isExampleLabel;
-    });
-
-    headingElements.forEach((el) => {
-      if (el.id && observer.current) {
-        observer.current.observe(el);
+      // Check if we're at the bottom of the page
+      if (scrollPosition + windowHeight >= docHeight - 50) {
+        setActiveId(headings[headings.length - 1].id);
+        return;
       }
-    });
 
-    return () => observer.current?.disconnect();
+      // Check if we're at the top
+      if (scrollPosition < 50) {
+        setActiveId(headings[0]?.id || "");
+        return;
+      }
+
+      // Find the current section
+      // We look for the last heading that is *above* a certain threshold from the top of the viewport
+      const offset = 100; // 100px from top
+      let currentSectionId = "";
+
+      for (const heading of headings) {
+        const element = document.getElementById(heading.id);
+        if (element) {
+          const { top } = element.getBoundingClientRect();
+          // If the element is above the offset (meaning we've scrolled past it)
+          if (top <= offset) {
+            currentSectionId = heading.id;
+          } else {
+            // Once we find an element below the offset, we stop because subsequent headings
+            // will definitely be below too
+            break;
+          }
+        }
+      }
+
+      if (currentSectionId) {
+        setActiveId(currentSectionId);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Trigger once on mount to set initial active state
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [headings]);
 
   const handleLinkClick = (

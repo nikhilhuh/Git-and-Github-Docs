@@ -54,13 +54,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
         }`}
       >
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-xs font-bold">
-            PC
-          </div>
+          <img
+            src="/images/github.png"
+            alt="GitHub Logo"
+            className={`w-7 h-7 rounded-md ${isDark ? "bg-white" : ""}`}
+          />
           <span
             className={`text-sm font-medium ${isDark ? "text-neutral-100" : "text-gray-900"}`}
           >
-            Production Code
+            Git &amp; GitHub Guide
           </span>
         </div>
 

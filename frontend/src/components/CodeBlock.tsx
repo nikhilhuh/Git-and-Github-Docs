@@ -9,79 +9,83 @@ interface CodeBlockProps {
   code: string;
   label: string;
   language?: string; // Dynamic language support
-  variant?: "success" | "danger";
   isDark: boolean;
 }
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({
   code,
   label,
-  language = "typescript", // Default to typescript for backward compatibility
-  variant = "success",
+  language = "typescript",
   isDark,
 }) => {
-  const borderColor =
-    variant === "success" ? "border-green-500" : "border-red-500";
-  const labelColor =
-    variant === "success"
-      ? isDark
-        ? "text-green-400"
-        : "text-green-600"
-      : isDark
-        ? "text-red-400"
-        : "text-red-600";
-  const bgBadge =
-    variant === "success"
-      ? isDark
-        ? "bg-green-900/40"
-        : "bg-green-50"
-      : isDark
-        ? "bg-red-900/40"
-        : "bg-red-50";
+  const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div
-      className={`my-6 border-l-4 ${borderColor} rounded-lg overflow-hidden shadow-md transition-colors border ${
-        isDark
-          ? "bg-neutral-800 border-neutral-700"
-          : "bg-white border-gray-200"
+      className={`my-6 rounded-lg overflow-hidden border shadow-lg transition-all duration-300 ${
+        isDark ? "bg-[#1e1e1e] border-neutral-800" : "bg-white border-gray-200"
       }`}
     >
+      {/* Terminal Header */}
       <div
-        className={`px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider ${labelColor} ${bgBadge} flex justify-between items-center border-b ${
-          isDark ? "border-neutral-700" : "border-gray-100"
+        className={`px-4 py-3 flex justify-between items-center border-b ${
+          isDark
+            ? "bg-[#252526] border-neutral-800"
+            : "bg-gray-100 border-gray-200"
         }`}
       >
-        <span>{label}</span>
+        <div className="flex items-center gap-2">
+          {/* Traffic Lights */}
+          <div className="flex gap-1.5 mr-4">
+            <div className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors" />
+            <div className="w-3 h-3 rounded-full bg-green-500/80 hover:bg-green-500 transition-colors" />
+          </div>
+          <span
+            className={`text-xs font-mono font-medium ${
+              isDark ? "text-neutral-400" : "text-gray-500"
+            }`}
+          >
+            {label}
+          </span>
+        </div>
+
         <button
           onClick={handleCopy}
-          className="hover:underline cursor-pointer opacity-70 hover:opacity-100"
-          title="Copy code"
+          className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+            isDark
+              ? "text-neutral-400 hover:text-white hover:bg-neutral-700"
+              : "text-gray-500 hover:text-gray-900 hover:bg-gray-200"
+          }`}
         >
-          Copy
+          {copied ? "Copied!" : "Copy"}
         </button>
       </div>
-      {/* Overflow container for horizontal scrolling */}
-      <div className="overflow-x-auto max-w-full">
+
+      {/* Code Content */}
+      <div className="overflow-x-auto">
         <div className="text-xs sm:text-sm">
           <SyntaxHighlighter
             language={language}
             style={isDark ? vscDarkPlus : vs}
             customStyle={{
               margin: 0,
-              padding: "0.75rem",
+              padding: "1.25rem",
               background: "transparent",
-              fontSize: "0.8125rem",
-              lineHeight: "1.5",
+              fontSize: "0.875rem",
+              lineHeight: "1.6",
             }}
             wrapLongLines={false}
             codeTagProps={{
               style: {
                 fontSize: "inherit",
+                fontFamily: "var(--font-mono, monospace)",
               },
             }}
           >

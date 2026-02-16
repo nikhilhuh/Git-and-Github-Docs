@@ -46,13 +46,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             {/* Logo/Icon placeholder - you can add an icon here */}
             <div className="flex items-center gap-2 mb-1">
-              <div
-                className={`w-10 h-10 rounded-md flex items-center justify-center text-sm font-bold ${
-                  isDark ? "bg-blue-600 text-white" : "bg-blue-600 text-white"
-                }`}
-              >
-                GH
-              </div>
+              <img
+                src="/images/github.png"
+                alt="GitHub Logo"
+                className={`w-10 h-10 rounded-full ${isDark ? "bg-white" : ""}`}
+              />
               <div>
                 <h2
                   className={`text-base font-semibold ${

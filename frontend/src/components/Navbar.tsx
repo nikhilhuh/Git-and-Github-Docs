@@ -16,13 +16,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isDark }) => {
     >
       {/* Left: Brand text (small) */}
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-xs font-bold">
-          GH
-        </div>
+        <img
+          src="/images/github.png"
+          alt="GitHub Logo"
+          className={`w-8 h-8 rounded-full ${isDark ? "bg-white" : ""}`}
+        />
         <span
           className={`text-sm font-medium ${isDark ? "text-neutral-100" : "text-gray-900"}`}
         >
-          Git &amp; GitHub
+          Git &amp; GitHub Guide
         </span>
       </div>
 
